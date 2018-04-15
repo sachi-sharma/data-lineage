@@ -8,6 +8,15 @@
 .homeWrapper {
     height: 100%;
 }
+.homeBtn {
+    height: 3em;
+    width: 3em;
+    background: #000000a1;
+    color: white;
+}
+.homeBtn:hover {
+    background: black;
+}
 .btnWrapper {
     height: 80%;
     background: #d9edf7;

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import '../css/Home.css';
 import '../css/LineageModel.css';
+import FaHome from 'react-icons/lib/fa/home';
 
 import ToggleDisplay from 'react-toggle-display';
 var cytoscape = require('cytoscape');
@@ -79,6 +80,7 @@ class Home extends Component {
           </div>
         </ToggleDisplay>
         <ToggleDisplay show={this.state.showLineage}>
+          <button className="homeBtn" onClick={this.handleClick} size={70}><FaHome /></button>
           <div className="cy" id="cy"></div>
         </ToggleDisplay>
       </div>
