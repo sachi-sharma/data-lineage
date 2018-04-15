@@ -1,0 +1,19 @@
+{
+	"systems": [ 
+	   {
+	     "data": { "id": "System1" }
+	   },
+	   {
+	     "data": { "id": "System2" }
+	   },
+	   {
+	     "data": { "id": "System3" }
+	   },
+	   {
+	     "data": { "id": "ab", "source": "System1", "target": "System2" }
+	   },
+	   {
+	     "data": { "id": "bc", "source": "System2", "target": "System3" }
+	   }
+	]
+}
