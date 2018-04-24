@@ -1,12 +1,8 @@
-.wrapper {
+.homeWrapper {
     position: absolute;
     width: 100%;
     height: 80%;
     top: 10%;
-}
-
-.homeWrapper {
-    height: 100%;
 }
 .homeBtn {
     height: 3em;
@@ -37,52 +33,4 @@
 .btnWrapper>button:hover {
     background-color: #337ab7a6;
     color: white;
-}
-
-.wrapper .sources {
-    text-align: center;
-    overflow-y: scroll;
-    height: 40%;
-    margin-top: 1em;
-}
-
-.wrapper .sources>a{
-    background: #337ab7d4;
-    color: white;
-    padding: 0.5em;
-    border-radius: 0.2em;
-    text-decoration: underline;
-    cursor: pointer;
-}
-
-.wrapper .sources>a:hover{
-    background: #337ab7;
-}
-
-.wrapper .sources .source {
-    margin: 5px;
-    background-color: #d9edf7;
-    padding: 5px;
-    text-decoration: underline;
-    cursor: pointer;
-}
-
-.wrapper .sources .source:hover {
-    background-color: #bfe7fb;
-}
-
-.wrapper .articles {
-    position: relative;
-    height: 60%;
-    overflow-y: scroll;
-}
-
-.wrapper .articles .article {
-    background-color: #d9edf7;
-    padding: 1em;
-    margin-bottom: 5px;
-}
-
-.wrapper .articles span h3, .wrapper .articles .article h2 {
-    margin: 0;
 }
