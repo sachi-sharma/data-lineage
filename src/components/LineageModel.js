@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import '../css/LineageModel.css'
 import FaHome from 'react-icons/lib/fa/home'
+import List from 'react-list-select'
+
 
 var cytoscape = require('cytoscape');
 const data = require('../../src/data/data.json');
@@ -9,9 +11,11 @@ class LineageModel extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      elements: []
+      elements: [],
+      systemList: []
     };
     this.handleClick = this.handleClick.bind(this);
+    this.handleNodeClick = this.handleNodeClick.bind(this);
   }
 
   componentWillMount() {
@@ -19,6 +23,11 @@ class LineageModel extends Component {
       elements: data.systems
     }));
     this.state.elements = data.systems
+    var sysArray = data.systems.filter(function(element){
+                                    return element.type === "node";
+                                });
+    this.state.systemList = sysArray.map(a => a.data.id);
+
   }
 
   loadSystems(system) {
@@ -47,7 +56,7 @@ class LineageModel extends Component {
         {
           selector: 'node',
           style: {
-            'background-color': '#666',
+            'background-color': '#a94442',
             'label': 'data(id)'
           }
         },
@@ -66,12 +75,52 @@ class LineageModel extends Component {
         name: 'random'
       }
     });
+
+    this.handleNodeClick(cy);
+
+  }
+  handleNodeClick(cy) {
+      var systems = data.systems.filter(function(element){
+          return element.type === "node";
+      });
+      for (const system in systems) {
+          if (systems.hasOwnProperty(system)) {
+              cy.$("#"+systems[system].data.id).on('tap', function(evt){
+                    console.log(evt);
+              });
+           }
+      }
+  }
+
+  handleFilter(selected) {
+    console.log(selected)
+    var self = this;
+    for(var idx in selected) {
+        console.log(this.state.systemList[selected[idx]])
+        /*Fix to include all nodes that match source or destination*/
+//        this.state.elements =   this.state.elements.filter(function(element){
+//                                    return (element.data.source === self.state.systemList[selected[idx]]
+//                                    || element.data.target === self.state.systemList[selected[idx]]);
+//                                });
+    }
+    this.renderDataLineage();
   }
 
   render() {
     return (
       <div className="lineageWrapper">
         <button className="homeBtn" onClick={this.handleClick} size={70}><FaHome /></button>
+
+        <div className="filterPanel">
+            <List
+                items={ this.state.systemList}
+                selected={[0]}
+                disabled={[4]}
+                multiple={true}
+                onChange={(selected: number) => { this.handleFilter(selected) }}
+              />
+        </div>
+
         <div className="cy" id="cy"></div>
       </div>
     );

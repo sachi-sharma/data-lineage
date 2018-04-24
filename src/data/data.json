@@ -1,19 +1,24 @@
 {
 	"systems": [ 
 	   {
+		 "type": "node",
 	     "data": { "id": "System1" }
 	   },
 	   {
+		"type": "node",
 	     "data": { "id": "System2" }
 	   },
 	   {
+		 "type": "node",
 	     "data": { "id": "System3" }
 	   },
 	   {
-	     "data": { "id": "ab", "source": "System1", "target": "System2" }
+		   "type": "edge",
+		   "data": { "id": "ab", "source": "System1", "target": "System2" }
 	   },
 	   {
-	     "data": { "id": "bc", "source": "System2", "target": "System3" }
+		   "type": "edge",
+		   "data": { "id": "bc", "source": "System2", "target": "System3" }
 	   }
 	]
 }
