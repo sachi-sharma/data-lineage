@@ -54,15 +54,16 @@ class LineageModel extends Component {
         {
           selector: 'edge',
           style: {
+            'curve-style': 'bezier',
             'width': 3,
             'line-color': '#ccc',
-            'target-arrow-color': 'turquoise',
+            'target-arrow-color': '#ccc',
             'target-arrow-shape': 'triangle'
           }
         }
       ],
       layout: {
-        name: 'grid'
+        name: 'random'
       }
     });
   }
