@@ -2,23 +2,23 @@
 	"systems": [ 
 	   {
 		 "type": "node",
-	     "data": { "id": "System1" }
+	     "data": { "id": "System1", "color": "#a94442"}
 	   },
 	   {
 		"type": "node",
-	     "data": { "id": "System2" }
+	     "data": { "id": "System2", "color": "#337ab7" }
 	   },
 	   {
 		 "type": "node",
-	     "data": { "id": "System3" }
+	     "data": { "id": "System3", "color": "#bb1313" }
 	   },
 	   {
 		 "type": "node",
-	     "data": { "id": "System4" }
+	     "data": { "id": "System4", "color": "#3c763d" }
 	   },
 	   {
 		 "type": "node",
-	     "data": { "id": "System5" }
+	     "data": { "id": "System5", "color": "#d4af2b" }
 	   },
 	   {
 		   "type": "edge",
@@ -42,7 +42,7 @@
 	   },
 	   {
 		   "type": "edge",
-		   "data": { "id": "f", "source": "System2", "target": "System5" }
+		   "data": { "id": "f", "source": "System5", "target": "System2" }
 	   }
 	]
 }

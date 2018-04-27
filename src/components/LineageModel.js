@@ -135,7 +135,7 @@ class LineageModel extends Component {
         {
           selector: 'node',
           style: {
-            'background-color': '#a94442',
+            'background-color': 'data(color)',
             'label': 'data(id)'
           }
         },
