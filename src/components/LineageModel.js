@@ -152,7 +152,7 @@ class LineageModel extends Component {
       ],
       layout: {
         name: 'grid',
-        rows: 2
+        rows: (this.state.systemList.length/2)
       }
     });
 
