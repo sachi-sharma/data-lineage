@@ -1,24 +1,24 @@
 {
   "overlaps": [
     {
-      "dest": "b",
+      "dest": "System3",
       "field": "f1",
-      "sources":  "a"                  
+      "sources":  "System2"                  
     },
     {
-      "dest": "b",
+      "dest": "System3",
       "field": "f1",
-      "sources": "c"
+      "sources": "System5"
     },
     {
-      "dest": "z",
+      "dest": "System2",
       "field": "f2",
-      "sources":  "x"
+      "sources":  "System1"
     },
     {
-      "dest": "z",
+      "dest": "System2",
       "field": "f2",
-      "sources":  "y"
+      "sources":  "System5"
     }
   ]
 }

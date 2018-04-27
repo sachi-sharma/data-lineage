@@ -42,7 +42,7 @@ class Overlap extends Component {
           data={this.state.data}
           columns={[
             {
-              Header: "Fields and Overlapping Systems",
+              Header: "Overlapping Systems",
               columns: [
                 {
                   Header: "Fields",

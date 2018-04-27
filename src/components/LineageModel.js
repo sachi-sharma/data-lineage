@@ -151,7 +151,8 @@ class LineageModel extends Component {
         }
       ],
       layout: {
-        name: 'random'
+        name: 'grid',
+        rows: 2
       }
     });
 

@@ -13,12 +13,36 @@
 	     "data": { "id": "System3" }
 	   },
 	   {
-		   "type": "edge",
-		   "data": { "id": "ab", "source": "System1", "target": "System2" }
+		 "type": "node",
+	     "data": { "id": "System4" }
+	   },
+	   {
+		 "type": "node",
+	     "data": { "id": "System5" }
 	   },
 	   {
 		   "type": "edge",
-		   "data": { "id": "bc", "source": "System2", "target": "System3" }
+		   "data": { "id": "a", "source": "System1", "target": "System2" }
+	   },
+	   {
+		   "type": "edge",
+		   "data": { "id": "b", "source": "System2", "target": "System3" }
+	   },
+	   {
+		   "type": "edge",
+		   "data": { "id": "c", "source": "System1", "target": "System4" }
+	   },
+	   {
+		   "type": "edge",
+		   "data": { "id": "d", "source": "System2", "target": "System5" }
+	   },
+	   {
+		   "type": "edge",
+		   "data": { "id": "e", "source": "System5", "target": "System3" }
+	   },
+	   {
+		   "type": "edge",
+		   "data": { "id": "f", "source": "System2", "target": "System5" }
 	   }
 	]
 }
