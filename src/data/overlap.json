@@ -19,6 +19,11 @@
       "dest": "System2",
       "field": "f2",
       "sources":  "System5"
+    },
+    {
+      "dest": "System2",
+      "field": "f2",
+      "sources":  "System3"
     }
   ]
 }

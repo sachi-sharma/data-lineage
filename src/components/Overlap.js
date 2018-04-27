@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import ReactTable from "react-table";
 import "react-table/react-table.css";
-import _ from 'lodash'
 
 import '../css/Overlap.css'
 import FaHome from 'react-icons/lib/fa/home'
@@ -58,7 +57,7 @@ class Overlap extends Component {
               ]
             }
           ]}
-          pivotBy={["fieldName"]}
+          pivotBy={["fieldName", "targetSystem"]}
           defaultPageSize={10}
           className="-striped -highlight"
         />
