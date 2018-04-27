@@ -57,7 +57,7 @@ class Overlap extends Component {
               ]
             }
           ]}
-          pivotBy={["fieldName", "targetSystem"]}
+          pivotBy={["fieldName"]}
           defaultPageSize={10}
           className="-striped -highlight"
         />
