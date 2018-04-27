@@ -1,0 +1,24 @@
+{
+  "overlaps": [
+    {
+      "dest": "b",
+      "field": "f1",
+      "sources":  "a"                  
+    },
+    {
+      "dest": "b",
+      "field": "f1",
+      "sources": "c"
+    },
+    {
+      "dest": "z",
+      "field": "f2",
+      "sources":  "x"
+    },
+    {
+      "dest": "z",
+      "field": "f2",
+      "sources":  "y"
+    }
+  ]
+}
