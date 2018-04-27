@@ -7,17 +7,20 @@ class Home extends Component {
     super(props);
     this.handleClick = this.handleClick.bind(this);
   }
-  handleClick() {
-      this.props.history.push('/model');
+  handleClick(value) {
+      this.props.history.push(value);
   }
   render() {
     return (
         <div className = "homeWrapper col-xs-12">
-            <div className="col-xs-6 btnWrapper" id= "btnWrapper">
-              <button id= "uploadBtn" onClick={this.handleClick}>  Upload Data </button>
+            <div className="col-xs-4 btnWrapper" id= "btnWrapper">
+              <button id= "uploadBtn" onClick={() => this.handleClick("/")}>  Upload Data </button>
             </div>
-            <div className="col-xs-6 btnWrapper" id= "viewLineage">
-              <button id= "viewLineageBtn" onClick={this.handleClick}>  View Lineage Model</button>
+            <div className="col-xs-4 btnWrapper" id= "viewLineage">
+              <button id= "viewLineageBtn" onClick={() => this.handleClick("/model")}>  View Lineage Model</button>
+            </div>
+            <div className="col-xs-4 btnWrapper" id= "viewOverLap">
+              <button id= "viewOverLapBtn" onClick={() => this.handleClick("/overlap")}>  View Overlap</button>
             </div>
         </div>
     );

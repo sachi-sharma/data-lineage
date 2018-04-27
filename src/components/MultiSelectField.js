@@ -1,7 +1,7 @@
 import React from 'react';
- import createClass from 'create-react-class';
- import PropTypes from 'prop-types';
- import Select from 'react-select';
+import createClass from 'create-react-class';
+import PropTypes from 'prop-types';
+import Select from 'react-select';
 
 
  var MultiSelectField = createClass({

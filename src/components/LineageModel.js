@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
+import 'react-select/dist/react-select.css'
+import MultiSelectField from './MultiSelectField'
 import '../css/LineageModel.css'
 import FaHome from 'react-icons/lib/fa/home'
-import 'react-select/dist/react-select.css';
-import MultiSelectField from './MultiSelectField';
+
 var cytoscape = require('cytoscape');
 const data = require('../../src/data/data.json');
 

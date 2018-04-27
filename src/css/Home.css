@@ -16,9 +16,9 @@
 .btnWrapper {
     height: 80%;
     background: #d9edf7;
-    margin: 5%;
-    width: 40%;
-    border-radius: 1em;
+    margin: 5% 0;
+    /* width: 40%; */
+    /* border-radius: 1em; */
     text-align: center;
 }
 
