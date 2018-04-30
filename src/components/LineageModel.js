@@ -16,7 +16,9 @@ class LineageModel extends Component {
       filteredElements: [],
       systemFilterList: [],
       systemList:[],
-      showActionPopUp:'none'
+      showAddNode:'none',
+      showAddEdge:'none',
+      popUpDestSystem: ''
     };
     this.loadSystems = this.loadSystems.bind(this);
     this.handleHomeClick = this.handleHomeClick.bind(this);
@@ -129,13 +131,19 @@ class LineageModel extends Component {
   }
 
   handleEditAction(action) {
-    this.setState({
-          showActionPopUp: 'block'
-    });
+
     switch(action) {
         case 'addNode':
+            this.setState({
+                  showAddNode: 'block',
+                  showAddEdge: 'none'
+            });
             break;
         case 'addEdge':
+            this.setState({
+                  showAddNode: 'none',
+                  showAddEdge: 'block'
+            });
             break;
         case 'removeNode':
             break;
@@ -144,22 +152,26 @@ class LineageModel extends Component {
         case 'saveAction':
             this.saveAction();
             this.setState({
-                showActionPopUp: 'none'
+                  showAddNode: 'none',
+                  showAddEdge: 'none'
             });
             break;
         case 'closeActionPopUp':
             this.setState({
-                showActionPopUp: 'none'
+                  showAddNode: 'none',
+                  showAddEdge: 'none'
             });
             break;
     }
   }
 
   saveAction() {
-    var srcSystem = document.getElementById("srcSystem").value;
+    var srcSystem = document.getElementById("srcSystemAddNode").value;
+    var destSystems = this.state.popUpDestSystem.split(', ');
     var newNode = { type: "node",
                     data: { "id": srcSystem, "color": "#a94442"}
                   }
+    // for(s in destSystems) {}
     this.setState(prevState => ({
             elements: [
                 ...prevState.elements,
@@ -167,6 +179,10 @@ class LineageModel extends Component {
             ]
         }),
       () => this.renderDataLineage(this.state.elements));
+  }
+
+  handlePopUpFilterChange(selected) {
+    this.state.popUpDestSystem = this.state.popUpDestSystem + ", "+selected;
   }
 
   renderDataLineage(elements) {
@@ -222,11 +238,23 @@ class LineageModel extends Component {
           </div>
           <div className="cy col-xs-8" id="cy"></div>
         </div>
-        <div className="actionPopup" style={{display:this.state.showActionPopUp}}>
-          <label>Source</label><br/><br/>
-          <input id = "srcSystem" placeholder="Enter System Name"/><br/><br/>
-          <label>Destination</label><br/><br/>
-          <MultiSelectField options={this.state.systemFilterList} action={(value) => this.handleFilterChange(value)}/>
+        <div className="actionPopup" style={{display:this.state.showAddNode}}>
+          <label>Source</label><br/>
+          <input id = "srcSystemAddNode" placeholder="Enter System Name"/><br/><br/>
+          <label>Destination</label><br/>
+          <MultiSelectField id = "destSystAddNode" options={this.state.systemFilterList} action={(value) => this.handlePopUpFilterChange(value)}/>
+          <br/>
+          <button className = "saveBtn" onClick={() => this.handleEditAction('saveAction')}>Save</button>
+          <button className = "cancelBtn" onClick={() => this.handleEditAction('closeActionPopUp')}>Cancel</button>
+        </div>
+        <div className="actionPopup" style={{display:this.state.showAddEdge}}>
+          <label>Source</label>
+          <br/>
+          <MultiSelectField id = "" options={this.state.systemFilterList} action={(value) => this.handleFilterChange(value)}/>
+          <br/><br/>
+          <label>Destination</label>
+          <br/>
+          <MultiSelectField id = "" options={this.state.systemFilterList} action={(value) => this.handleFilterChange(value)}/>
           <br/>
           <button className = "saveBtn" onClick={() => this.handleEditAction('saveAction')}>Save</button>
           <button className = "cancelBtn" onClick={() => this.handleEditAction('closeActionPopUp')}>Cancel</button>
