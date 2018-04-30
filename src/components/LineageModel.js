@@ -15,13 +15,15 @@ class LineageModel extends Component {
       elements: [],
       filteredElements: [],
       systemFilterList: [],
-      systemList:[]
+      systemList:[],
+      showActionPopUp:'none'
     };
     this.loadSystems = this.loadSystems.bind(this);
     this.handleHomeClick = this.handleHomeClick.bind(this);
     this.handleNodeClick = this.handleNodeClick.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.renderDataLineage = this.renderDataLineage.bind(this);
+    this.handleEditAction = this.handleEditAction.bind(this);
   }
 
   componentWillMount() {
@@ -126,6 +128,47 @@ class LineageModel extends Component {
         this.renderDataLineage(filteredElements);
   }
 
+  handleEditAction(action) {
+    this.setState({
+          showActionPopUp: 'block'
+    });
+    switch(action) {
+        case 'addNode':
+            break;
+        case 'addEdge':
+            break;
+        case 'removeNode':
+            break;
+        case 'removeEdge':
+            break;
+        case 'saveAction':
+            this.saveAction();
+            this.setState({
+                showActionPopUp: 'none'
+            });
+            break;
+        case 'closeActionPopUp':
+            this.setState({
+                showActionPopUp: 'none'
+            });
+            break;
+    }
+  }
+
+  saveAction() {
+    var srcSystem = document.getElementById("srcSystem").value;
+    var newNode = { type: "node",
+                    data: { "id": srcSystem, "color": "#a94442"}
+                  }
+    this.setState(prevState => ({
+            elements: [
+                ...prevState.elements,
+                newNode
+            ]
+        }),
+      () => this.renderDataLineage(this.state.elements));
+  }
+
   renderDataLineage(elements) {
     var cy = cytoscape({
       container: document.getElementById('cy'),
@@ -161,14 +204,33 @@ class LineageModel extends Component {
 
   render() {
     return (
-      <div className="lineageWrapper">
-        <button className="homeBtn" onClick={this.handleHomeClick} size={70}><FaHome /></button>
-        <div className="filterPanel">
-    			<div className="section">
-    				<MultiSelectField options={this.state.systemFilterList} action={(value) => this.handleFilterChange(value)}/>
-    			</div>
+      <div>
+        <div className="lineageWrapper">
+          <button className="homeBtn col-xs-12" onClick={this.handleHomeClick} size={70}><FaHome /></button>
+          <div className="actionPanel col-xs-4">
+            <div className="filterPanel">
+              <div className="section">
+                <MultiSelectField options={this.state.systemFilterList} action={(value) => this.handleFilterChange(value)}/>
+              </div>
+            </div>
+            <div className="addRemovePanel">
+              <button className="addNodeBtn col-xs-12" onClick={() => this.handleEditAction('addNode')} size={70}>Add Node</button>
+              <button className="addEdgeBtn col-xs-12" onClick={() => this.handleEditAction('addEdge')} size={70}>Add Edge</button>
+              <button className="removeNodeBtn col-xs-12" onClick={() => this.handleNodeAction('removeNode')} size={70}>Remove Node</button>
+              <button className="removeEdgeBtn col-xs-12" onClick={() => this.handleEditAction('addEdge')} size={70}>Remove Edge</button>
+            </div>
+          </div>
+          <div className="cy col-xs-8" id="cy"></div>
         </div>
-        <div className="cy" id="cy"></div>
+        <div className="actionPopup" style={{display:this.state.showActionPopUp}}>
+          <label>Source</label><br/><br/>
+          <input id = "srcSystem" placeholder="Enter System Name"/><br/><br/>
+          <label>Destination</label><br/><br/>
+          <MultiSelectField options={this.state.systemFilterList} action={(value) => this.handleFilterChange(value)}/>
+          <br/>
+          <button className = "saveBtn" onClick={() => this.handleEditAction('saveAction')}>Save</button>
+          <button className = "cancelBtn" onClick={() => this.handleEditAction('closeActionPopUp')}>Cancel</button>
+        </div>
       </div>
     );
   }
