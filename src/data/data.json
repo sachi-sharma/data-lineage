@@ -22,27 +22,27 @@
 	   },
 	   {
 		   "type": "edge",
-		   "data": { "id": "a", "source": "System1", "target": "System2" }
+		   "data": { "id": "System1System2", "source": "System1", "target": "System2" }
 	   },
 	   {
 		   "type": "edge",
-		   "data": { "id": "b", "source": "System2", "target": "System3" }
+		   "data": { "id": "System2System3", "source": "System2", "target": "System3" }
 	   },
 	   {
 		   "type": "edge",
-		   "data": { "id": "c", "source": "System1", "target": "System4" }
+		   "data": { "id": "System1System4", "source": "System1", "target": "System4" }
 	   },
 	   {
 		   "type": "edge",
-		   "data": { "id": "d", "source": "System2", "target": "System5" }
+		   "data": { "id": "System2System5", "source": "System2", "target": "System5" }
 	   },
 	   {
 		   "type": "edge",
-		   "data": { "id": "e", "source": "System5", "target": "System3" }
+		   "data": { "id": "System5System3", "source": "System5", "target": "System3" }
 	   },
 	   {
 		   "type": "edge",
-		   "data": { "id": "f", "source": "System5", "target": "System2" }
+		   "data": { "id": "System5System2", "source": "System5", "target": "System2" }
 	   }
 	]
 }

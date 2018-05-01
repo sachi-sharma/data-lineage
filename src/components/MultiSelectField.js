@@ -29,7 +29,7 @@ import Select from 'react-select';
  				<Select
  					closeOnSelect={!stayOpen}
  					disabled={disabled}
- 					multi
+ 					multi={this.props.multi}
  					onChange={(value) => { this.props.action(value); this.handleSelectChange(value);}}
  					options={this.props.options}
  					placeholder="Select System(s)"

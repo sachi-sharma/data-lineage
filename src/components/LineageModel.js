@@ -18,14 +18,27 @@ class LineageModel extends Component {
       systemList:[],
       showAddNode:'none',
       showAddEdge:'none',
-      popUpDestSystem: ''
+      showRemoveNode:'none',
+      showRemoveEdge:'none',
+      addNodeDestSystem: '',
+      addEdgeSrcSystem:'',
+      addEdgeDestSystem:'',
+      removeEdgeSrcSystem:'',
+      removeEdgeDestSystem:''
     };
     this.loadSystems = this.loadSystems.bind(this);
+    this.createFilterList = this.createFilterList.bind(this);
     this.handleHomeClick = this.handleHomeClick.bind(this);
     this.handleNodeClick = this.handleNodeClick.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
-    this.renderDataLineage = this.renderDataLineage.bind(this);
     this.handleEditAction = this.handleEditAction.bind(this);
+    this.handlePopUpFilterChange = this.handlePopUpFilterChange.bind(this);
+    this.saveChg = this.saveChg.bind(this);
+    this.addNode = this.addNode.bind(this);
+    this.addEdge = this.addEdge.bind(this);
+    this.removeNode = this.removeNode.bind(this);
+    this.removeEdge = this.removeEdge.bind(this);
+    this.renderDataLineage = this.renderDataLineage.bind(this);
   }
 
   componentWillMount() {
@@ -34,13 +47,8 @@ class LineageModel extends Component {
     }));
     this.state.elements = data.systems;
     /* Create system List for filter */
-    var sysArray = data.systems.filter(function(element){
-                                          return element.type === "node";
-                                      });
-    this.state.systemList = sysArray.map(a => a.data.id);
-    for(var sys in this.state.systemList) {
-      this.state.systemFilterList.push({"label":this.state.systemList[sys],"value":sys});
-    }
+    this.createFilterList();
+
   }
 
   componentDidMount() {
@@ -54,6 +62,18 @@ class LineageModel extends Component {
         system
       ]
     }))
+  }
+
+  createFilterList() {
+    this.state.systemList = [];
+    this.state.systemFilterList = [];
+    var sysArray = this.state.elements.filter(function(element){
+                                           return element.type === "node";
+                                       });
+    this.state.systemList = sysArray.map(a => a.data.id);
+    for(var sys in this.state.systemList) {
+        this.state.systemFilterList.push({"label":this.state.systemList[sys],"value":sys});
+    }
   }
 
   handleHomeClick() {
@@ -130,59 +150,179 @@ class LineageModel extends Component {
         this.renderDataLineage(filteredElements);
   }
 
-  handleEditAction(action) {
-
+  handleEditAction(action, subAction) {
     switch(action) {
         case 'addNode':
             this.setState({
                   showAddNode: 'block',
-                  showAddEdge: 'none'
+                  showAddEdge: 'none',
+                  showRemoveNode: 'none',
+                  showRemoveEdge: 'none'
             });
             break;
         case 'addEdge':
             this.setState({
                   showAddNode: 'none',
-                  showAddEdge: 'block'
+                  showAddEdge: 'block',
+                  showRemoveNode: 'none',
+                  showRemoveEdge: 'none'
             });
             break;
         case 'removeNode':
-            break;
-        case 'removeEdge':
-            break;
-        case 'saveAction':
-            this.saveAction();
             this.setState({
                   showAddNode: 'none',
-                  showAddEdge: 'none'
+                  showAddEdge: 'none',
+                  showRemoveNode: 'block',
+                  showRemoveEdge: 'none'
             });
             break;
-        case 'closeActionPopUp':
+        case 'removeEdge':
             this.setState({
                   showAddNode: 'none',
-                  showAddEdge: 'none'
+                  showAddEdge: 'none',
+                  showRemoveNode: 'none',
+                  showRemoveEdge: 'block'
+            });
+            break;
+        case 'saveChg':
+            this.saveChg(subAction);
+            this.setState({
+                  showAddNode: 'none',
+                  showAddEdge: 'none',
+                  showRemoveNode: 'none',
+                  showRemoveEdge: 'none'
+            });
+            break;
+        case 'closePopUp':
+            this.setState({
+                  showAddNode: 'none',
+                  showAddEdge: 'none',
+                  showRemoveNode: 'none',
+                  showRemoveEdge: 'none'
             });
             break;
     }
   }
 
-  saveAction() {
+  handlePopUpFilterChange(selected, action) {
+    switch(action) {
+        case 'addNodeDest':
+          this.state.addNodeDestSystem = selected;
+          break;
+        case 'addEdgeSrc':
+          this.state.addEdgeSrcSystem = selected;
+          break;
+        case 'addEdgeDest':
+          this.state.addEdgeDestSystem = selected;
+          break;
+        case 'removeEdgeSrc':
+          this.state.removeEdgeSrcSystem = selected;
+          break;
+        case 'removeEdgeDest':
+          this.state.removeEdgeDestSystem = selected;
+          break;
+    }
+  }
+
+  saveChg(subAction) {
+    switch(subAction) {
+        case 'addNode':
+          this.addNode();
+          break;
+        case 'addEdge':
+          this.addEdge();
+          break;
+        case 'removeNode':
+          this.removeNode();
+          break;
+        case 'removeEdge':
+          this.removeEdge();
+          break;
+    }
+    
+  }
+
+  addNode() {
     var srcSystem = document.getElementById("srcSystemAddNode").value;
-    var destSystems = this.state.popUpDestSystem.split(', ');
+    var isNodePresent = this.state.elements.filter(function(element){
+                                           return element.data.id === srcSystem;
+                                       });
+    if(isNodePresent.length > 0)
+      return;
+
     var newNode = { type: "node",
                     data: { "id": srcSystem, "color": "#a94442"}
                   }
-    // for(s in destSystems) {}
     this.setState(prevState => ({
             elements: [
                 ...prevState.elements,
                 newNode
             ]
         }),
-      () => this.renderDataLineage(this.state.elements));
+        () => {
+                if(this.state.addNodeDestSystem.length > 0) {
+                  var destSystems = this.state.addNodeDestSystem.split(',');    
+                  for(var idx in destSystems) {
+                    var destSys = this.state.systemList[destSystems[idx]].trim();
+                    var newEdge = {
+                                   "type": "edge",
+                                   "data": {id: srcSystem+""+destSys, source: srcSystem, target: destSys}
+                                  }
+                    this.state.elements.splice(this.state.elements.length,0,newEdge);
+                  }
+                  this.renderDataLineage(this.state.elements)
+                  this.createFilterList();
+                }
+                else {
+                  this.renderDataLineage(this.state.elements)
+                  this.createFilterList();
+                }
+        }
+    );
   }
 
-  handlePopUpFilterChange(selected) {
-    this.state.popUpDestSystem = this.state.popUpDestSystem + ", "+selected;
+  addEdge(selected) {
+    var srcSystem = this.state.elements[this.state.addEdgeSrcSystem];
+    srcSystem = srcSystem.data.id;
+    if(this.state.addEdgeDestSystem.length > 0) {
+      var destSystems = this.state.addEdgeDestSystem.split(',');
+      for(var idx in destSystems) {
+        var destSys = this.state.systemList[destSystems[idx]].trim();
+        var edgeId = srcSystem+""+destSys;
+        var isNodePresent = this.state.elements.filter(function(element){
+                                           return element.data.id === edgeId;
+                                       });
+        if(isNodePresent.length > 0)
+          return;
+        var newEdge = {
+                       "type": "edge",
+                       "data": {id: edgeId, source: srcSystem, target: destSys}
+                      }
+        this.state.elements.splice(this.state.elements.length,0,newEdge);
+      }
+      this.renderDataLineage(this.state.elements);
+    }
+  }
+
+  removeNode() {
+
+  }
+
+  removeEdge() {
+    var edgeId = this.state.elements[this.state.removeEdgeSrcSystem].data.id+""+this.state.elements[this.state.removeEdgeDestSystem].data.id;
+    // this.state.removeEdgeSrcSystem = '';
+    // this.state.removeEdgeDestSyste = '';
+    this.state.elements = this.state.elements.filter(function(element){
+                                           return element.data.id != edgeId;
+                                       });
+    // this.setState({
+    //                 addNodeDestSystem: '',
+    //                 addEdgeSrcSystem:'',
+    //                 addEdgeDestSystem:'',
+    //                 removeEdgeSrcSystem:'',
+    //                 removeEdgeDestSystem:''
+    //             });
+    this.renderDataLineage(this.state.elements)
   }
 
   renderDataLineage(elements) {
@@ -226,14 +366,13 @@ class LineageModel extends Component {
           <div className="actionPanel col-xs-4">
             <div className="filterPanel">
               <div className="section">
-                <MultiSelectField options={this.state.systemFilterList} action={(value) => this.handleFilterChange(value)}/>
+                <MultiSelectField multi = {true} options={this.state.systemFilterList} action={(value) => this.handleFilterChange(value)}/>
               </div>
             </div>
             <div className="addRemovePanel">
               <button className="addNodeBtn col-xs-12" onClick={() => this.handleEditAction('addNode')} size={70}>Add Node</button>
               <button className="addEdgeBtn col-xs-12" onClick={() => this.handleEditAction('addEdge')} size={70}>Add Edge</button>
-              <button className="removeNodeBtn col-xs-12" onClick={() => this.handleNodeAction('removeNode')} size={70}>Remove Node</button>
-              <button className="removeEdgeBtn col-xs-12" onClick={() => this.handleEditAction('addEdge')} size={70}>Remove Edge</button>
+              <button className="removeEdgeBtn col-xs-12" onClick={() => this.handleEditAction('removeEdge')} size={70}>Remove Edge</button>
             </div>
           </div>
           <div className="cy col-xs-8" id="cy"></div>
@@ -242,22 +381,34 @@ class LineageModel extends Component {
           <label>Source</label><br/>
           <input id = "srcSystemAddNode" placeholder="Enter System Name"/><br/><br/>
           <label>Destination</label><br/>
-          <MultiSelectField id = "destSystAddNode" options={this.state.systemFilterList} action={(value) => this.handlePopUpFilterChange(value)}/>
+          <MultiSelectField multi = {true} options={this.state.systemFilterList} action={(value) => this.handlePopUpFilterChange(value,'addNodeDest')}/>
           <br/>
-          <button className = "saveBtn" onClick={() => this.handleEditAction('saveAction')}>Save</button>
-          <button className = "cancelBtn" onClick={() => this.handleEditAction('closeActionPopUp')}>Cancel</button>
+          <button className = "saveBtn" onClick={() => this.handleEditAction('saveChg','addNode')}>Save</button>
+          <button className = "cancelBtn" onClick={() => this.handleEditAction('closePopUp')}>Cancel</button>
         </div>
         <div className="actionPopup" style={{display:this.state.showAddEdge}}>
           <label>Source</label>
           <br/>
-          <MultiSelectField id = "" options={this.state.systemFilterList} action={(value) => this.handleFilterChange(value)}/>
+          <MultiSelectField multi ={false} options={this.state.systemFilterList} action={(value) => this.handlePopUpFilterChange(value,'addEdgeSrc')}/>
           <br/><br/>
           <label>Destination</label>
           <br/>
-          <MultiSelectField id = "" options={this.state.systemFilterList} action={(value) => this.handleFilterChange(value)}/>
+          <MultiSelectField multi = {true} options={this.state.systemFilterList} action={(value) => this.handlePopUpFilterChange(value,'addEdgeDest')}/>
           <br/>
-          <button className = "saveBtn" onClick={() => this.handleEditAction('saveAction')}>Save</button>
-          <button className = "cancelBtn" onClick={() => this.handleEditAction('closeActionPopUp')}>Cancel</button>
+          <button className = "saveBtn" onClick={() => this.handleEditAction('saveChg','addEdge')}>Save</button>
+          <button className = "cancelBtn" onClick={() => this.handleEditAction('closePopUp')}>Cancel</button>
+        </div>
+        <div className="actionPopup" style={{display:this.state.showRemoveEdge}}>
+          <label>Source</label>
+          <br/>
+          <MultiSelectField multi = {false} options={this.state.systemFilterList} action={(value) => this.handlePopUpFilterChange(value,'removeEdgeSrc')}/>
+          <br/><br/>
+          <label>Destination</label>
+          <br/>
+          <MultiSelectField multi = {false} options={this.state.systemFilterList} action={(value) => this.handlePopUpFilterChange(value,'removeEdgeDest')}/>
+          <br/>
+          <button className = "saveBtn" onClick={() => this.handleEditAction('saveChg','removeEdge')}>Save</button>
+          <button className = "cancelBtn" onClick={() => this.handleEditAction('closePopUp')}>Cancel</button>
         </div>
       </div>
     );
