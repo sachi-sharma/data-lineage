@@ -61,19 +61,18 @@ class LineageModel extends Component {
         ...prevState.systems,
         system
       ]
-    }))
+    }));
   }
 
   createFilterList() {
     this.state.systemList = [];
     this.state.systemFilterList = [];
     var sysArray = this.state.elements.filter(function(element){
-                                           return element.type === "node";
-                                       });
+                       return element.type === "node";
+                   });
     this.state.systemList = sysArray.map(a => a.data.id);
-    for(var sys in this.state.systemList) {
+    for(var sys in this.state.systemList)
         this.state.systemFilterList.push({"label":this.state.systemList[sys],"value":sys});
-    }
   }
 
   handleHomeClick() {
@@ -97,8 +96,8 @@ class LineageModel extends Component {
     var selectedArr = selectedOption.split(",");
     var filteredSysArray = [], filteredElements = [];
     var allNodesArray = this.state.elements.filter(function(element){
-                                                      return element.type === "node";
-                                                  });
+                            return element.type === "node";
+                        });
     /*If none is selected, render all*/
     if(selectedArr.length === 1 && selectedArr[0].length === 0) {
       this.renderDataLineage(this.state.elements);
@@ -110,10 +109,10 @@ class LineageModel extends Component {
     for(var idx in selectedArr) {
         if(selectedArr.length > 0) {
             var newNodes = (this.state.elements.filter(function(element){
-                                                                    return (element.data.source === self.state.systemList[selectedArr[idx]]
-                                                                            || element.data.target === self.state.systemList[selectedArr[idx]]
-                                                                            || element.data.id === self.state.systemList[selectedArr[idx]]);
-                                                                  }));
+                              return (element.data.source === self.state.systemList[selectedArr[idx]]
+                                      || element.data.target === self.state.systemList[selectedArr[idx]]
+                                      || element.data.id === self.state.systemList[selectedArr[idx]]);
+                            }));
             sysAndEdgeArr.push.apply(sysAndEdgeArr, newNodes);
             filteredSysArray.push(this.state.systemList[selectedArr[idx]]);
         }
@@ -239,15 +238,14 @@ class LineageModel extends Component {
           this.removeEdge();
           break;
     }
-    
   }
 
   addNode() {
     var srcSystem = document.getElementById("srcSystemAddNode").value;
     var isNodePresent = this.state.elements.filter(function(element){
-                                           return element.data.id === srcSystem;
-                                       });
-    if(isNodePresent.length > 0)
+                            return element.data.id === srcSystem;
+                        });
+    if(isNodePresent.length > 0 || srcSystem.length === 0)
       return;
 
     var newNode = { type: "node",
@@ -283,15 +281,18 @@ class LineageModel extends Component {
 
   addEdge(selected) {
     var srcSystem = this.state.elements[this.state.addEdgeSrcSystem];
+    if(!srcSystem) return;
     srcSystem = srcSystem.data.id;
+    if(srcSystem.length === 0 || this.state.addEdgeDestSystem.length === 0)
+      return;
     if(this.state.addEdgeDestSystem.length > 0) {
       var destSystems = this.state.addEdgeDestSystem.split(',');
       for(var idx in destSystems) {
         var destSys = this.state.systemList[destSystems[idx]].trim();
         var edgeId = srcSystem+""+destSys;
         var isNodePresent = this.state.elements.filter(function(element){
-                                           return element.data.id === edgeId;
-                                       });
+                              return element.data.id === edgeId;
+                            });
         if(isNodePresent.length > 0)
           return;
         var newEdge = {
@@ -309,19 +310,14 @@ class LineageModel extends Component {
   }
 
   removeEdge() {
-    var edgeId = this.state.elements[this.state.removeEdgeSrcSystem].data.id+""+this.state.elements[this.state.removeEdgeDestSystem].data.id;
-    // this.state.removeEdgeSrcSystem = '';
-    // this.state.removeEdgeDestSyste = '';
+    if(!this.state.removeEdgeSrcSystem || !this.state.removeEdgeDestSystem) return;
+    var srcId = this.state.elements[this.state.removeEdgeSrcSystem].data.id;
+    var destId = this.state.elements[this.state.removeEdgeDestSystem].data.id;
+    if(srcId.length === 0 || destId.length === 0) return;
+    var edgeId = srcId+""+destId;
     this.state.elements = this.state.elements.filter(function(element){
-                                           return element.data.id != edgeId;
-                                       });
-    // this.setState({
-    //                 addNodeDestSystem: '',
-    //                 addEdgeSrcSystem:'',
-    //                 addEdgeDestSystem:'',
-    //                 removeEdgeSrcSystem:'',
-    //                 removeEdgeDestSystem:''
-    //             });
+                              return element.data.id != edgeId;
+                          });
     this.renderDataLineage(this.state.elements)
   }
 
@@ -354,7 +350,6 @@ class LineageModel extends Component {
         rows: (this.state.systemList.length/2)
       }
     });
-
     this.handleNodeClick(cy);
   }
 
