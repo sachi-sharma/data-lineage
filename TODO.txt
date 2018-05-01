@@ -3,3 +3,4 @@
 2. API integration
 3. Upload file
 4. Overlap issues
+5. Clear main filter if a new node/ edge is added
