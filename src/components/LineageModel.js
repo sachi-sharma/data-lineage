@@ -311,12 +311,12 @@ class LineageModel extends Component {
 
   removeEdge() {
     if(!this.state.removeEdgeSrcSystem || !this.state.removeEdgeDestSystem) return;
-    var srcId = this.state.elements[this.state.removeEdgeSrcSystem].data.id;
-    var destId = this.state.elements[this.state.removeEdgeDestSystem].data.id;
+    var srcId = this.state.systemList[this.state.removeEdgeSrcSystem];
+    var destId = this.state.systemList[this.state.removeEdgeDestSystem];
     if(srcId.length === 0 || destId.length === 0) return;
     var edgeId = srcId+""+destId;
     this.state.elements = this.state.elements.filter(function(element){
-                              return element.data.id != edgeId;
+                              return element.data.id !== edgeId;
                           });
     this.renderDataLineage(this.state.elements)
   }
