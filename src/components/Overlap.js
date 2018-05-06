@@ -18,12 +18,22 @@ class Overlap extends Component {
   }
 
   componentWillMount() {
-    for(var idx in data.overlaps) {
-      this.state.data.push( { "fieldName" : data.overlaps[idx].field,
-                              "targetSystem" : data.overlaps[idx].dest,
-                              "srcSystems" : data.overlaps[idx].sources
+    fetch('http://127.0.0.1:8000/getOverlaps', {
+      method: 'GET',
+      mode:'cors'
+    })
+    .then(function(response) { return response.json(); })
+    .then((response) => {
+      var allOverlaps = []
+      response.overlaps.forEach((overlap)=>{
+        console.log(overlap);
+        allOverlaps.push( { "fieldName" : overlap.field,
+                              "targetSystem" : overlap.dest,
+                              "srcSystems" : overlap.sources
                             });
-    }
+      })
+      this.setState({data : allOverlaps})
+    }); 
   }
 
   componentDidMount() {
@@ -35,6 +45,7 @@ class Overlap extends Component {
 
   render() {
     return (
+      
       <div className="overlapWrapper">
         <button className="homeBtn" onClick={this.handleHomeClick} size={70}><FaHome /></button>
         <ReactTable
@@ -45,20 +56,38 @@ class Overlap extends Component {
               columns: [
                 {
                   Header: "Fields",
-                  accessor: "fieldName"
+                  accessor: "fieldName",
                 },{
                   Header: "Target System",
-                  accessor: "targetSystem"
+                  accessor: "targetSystem",
                 },{
                   Header: "Source Systems",
                   id: "srcSystems",
-                  accessor: d => d.srcSystems
+                  accessor: d => d.srcSystems,
+                  aggregate: vals => {
+                    var temp = []
+                    vals.forEach((val)=>{
+                      val.split(" , ").forEach((ele)=>{
+                        temp.push(ele)
+                      })
+                    })
+                    return [...new Set(temp)].join(" , ")
+                  },
+                  Aggregated: row => {
+                    return (
+                      <span>
+                        {row.value}
+                      </span>
+                    );
+                 },
+                 filterMethod: (filter, row) => row[filter.id].toLowerCase().includes(filter.value.toLowerCase())
                 }
               ]
             }
           ]}
-          pivotBy={["fieldName"]}
+          pivotBy={["fieldName", "targetSystem"]}
           defaultPageSize={10}
+          filterable
           className="-striped -highlight"
         />
       </div>
