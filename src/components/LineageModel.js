@@ -26,7 +26,7 @@ class LineageModel extends Component {
       removeEdgeSrcSystem:'',
       removeEdgeDestSystem:''
     };
-    this.loadSystems = this.loadSystems.bind(this);
+    this.getData = this.getData.bind(this);
     this.createFilterList = this.createFilterList.bind(this);
     this.handleHomeClick = this.handleHomeClick.bind(this);
     this.handleNodeClick = this.handleNodeClick.bind(this);
@@ -36,32 +36,40 @@ class LineageModel extends Component {
     this.saveChg = this.saveChg.bind(this);
     this.addNode = this.addNode.bind(this);
     this.addEdge = this.addEdge.bind(this);
-    this.removeNode = this.removeNode.bind(this);
     this.removeEdge = this.removeEdge.bind(this);
+    this.callApi = this.callApi.bind(this);
     this.renderDataLineage = this.renderDataLineage.bind(this);
   }
 
   componentWillMount() {
-    this.setState(prevState => ({
-      elements: data.systems
-    }));
+    // this.getData();
     this.state.elements = data.systems;
-    /* Create system List for filter */
     this.createFilterList();
-
   }
 
   componentDidMount() {
     this.renderDataLineage(this.state.elements);
   }
 
-  loadSystems(system) {
-    this.setState(prevState => ({
-      systems: [
-        ...prevState.systems,
-        system
-      ]
-    }));
+  getData() {
+   var self = this;
+   fetch("http://localhost:8000/getModels")
+     .then(response => response.json())
+     .then(dataFromApi => {
+       dataFromApi.systems.forEach(function(system) {
+           self.setState(prevState => ({
+                elements: [
+                  ...prevState.elements,
+                  system
+                ]
+              }));
+           if(self.state.elements.length === dataFromApi.systems.length) {
+               /* Create system List for filter */
+               self.createFilterList();
+               self.renderDataLineage(dataFromApi.systems);
+           }
+       });
+     });
   }
 
   createFilterList() {
@@ -75,20 +83,186 @@ class LineageModel extends Component {
         this.state.systemFilterList.push({"label":this.state.systemList[sys],"value":sys});
   }
 
+  saveChg(subAction) {
+    switch(subAction) {
+        case 'addNode':
+          this.addNode();
+          break;
+        case 'addEdge':
+          this.addEdge();
+          break;
+        case 'removeEdge':
+          this.removeEdge();
+          break;
+        default:
+            break;
+    }
+  }
+
+  addNode() {
+    var srcSystem = document.getElementById("srcSystemAddNode").value;
+    var isNodePresent = this.state.elements.filter(function(element){
+                            return element.data.id === srcSystem;
+                        });
+    if(isNodePresent.length > 0 || srcSystem.length === 0)
+      return;
+    // this.callApi("manualProcessNode", JSON.stringify({action:"add", nodeName: srcSystem}));
+    var self = this;
+    var url = "http://localhost:8000/"+"manualProcessNode";
+    var data = new FormData();
+    data.append("action","add");
+    data.append("nodeName",srcSystem);
+    fetch(url, {
+           method: 'post',
+           body: data
+         }).then(function(response) {
+            if(response.status === 403) {
+                alert('Err');
+                return;
+            }
+            else {
+                /*FE chg*/
+                var newNode = { type: "node", data: { "id": srcSystem, "color": "red"} }
+                self.setState(prevState => ({
+                        elements: [
+                            ...prevState.elements,
+                            newNode
+                        ]
+                    }),
+                    () => {
+                            if(self.state.addNodeDestSystem.length > 0) {
+                              var destSystems = self.state.addNodeDestSystem.split(',');
+                              for(var idx in destSystems) {
+                                var destSys = self.state.systemList[destSystems[idx]].trim();
+                                var newEdge = {
+                                               "type": "edge",
+                                               "data": {id: srcSystem+""+destSys, source: srcSystem, target: destSys}
+                                              }
+                                self.state.elements.splice(self.state.elements.length,0,newEdge);
+                              }
+                              self.renderDataLineage(self.state.elements)
+                              self.createFilterList();
+                            }
+                            else {
+                              self.renderDataLineage(self.state.elements)
+                              self.createFilterList();
+                            }
+                    }
+                );
+            }
+        });
+  }
+
+  addEdge(selected) {
+    var srcSystem = this.state.elements[this.state.addEdgeSrcSystem];
+    if(!srcSystem) return;
+    srcSystem = srcSystem.data.id;
+    if(srcSystem.length === 0 || this.state.addEdgeDestSystem.length === 0)
+      return;
+    if(this.state.addEdgeDestSystem.length > 0) {
+      var destSystems = this.state.addEdgeDestSystem.split(',');
+      for(var idx in destSystems) {
+        var destSys = this.state.systemList[destSystems[idx]].trim();
+     // this.callApi("manualProcessRelationship", JSON.stringify({action:"add", source: srcSystem, dest: destSys}));
+        var self = this;
+        var url = "http://localhost:8000/"+"manualProcessRelationship";
+        var data = new FormData();
+        data.append("action","add");
+        data.append("source",srcSystem);
+        data.append("destination",destSys);
+        fetch(url, {
+               method: 'post',
+               body: data
+             }).then(function(response) {
+                if(response.status === 403){
+                    alert('Err');
+                    return;
+                }
+                else {
+                        /*FE chg*/
+                        var edgeId = srcSystem+""+destSys;
+                        var isNodePresent = self.state.elements.filter(function(element){
+                                              return element.data.id === edgeId;
+                                            });
+                        if(isNodePresent.length > 0)
+                          return;
+                        var newEdge = {
+                                       "type": "edge",
+                                       "data": {id: edgeId, source: srcSystem, target: destSys}
+                                      }
+                        self.state.elements.splice(self.state.elements.length,0,newEdge);
+                        self.renderDataLineage(self.state.elements);
+                }
+            });
+      }
+      
+    }
+  }
+
+  removeEdge() {
+    if(!this.state.removeEdgeSrcSystem || !this.state.removeEdgeDestSystem) return;
+    var srcId = this.state.systemList[this.state.removeEdgeSrcSystem];
+    var destId = this.state.systemList[this.state.removeEdgeDestSystem];
+    if(srcId.length === 0 || destId.length === 0) return;
+    // this.callApi("manualProcessRelationship", JSON.stringify({action:"remove", source: srcId, dest: destId}));
+    var self = this;
+    var url = "http://localhost:8000/"+"manualProcessRelationship";
+    var data = new FormData();
+    data.append("action","remove");
+    data.append("source",srcId);
+    data.append("destination",destId);    
+
+    fetch(url, {
+      method: 'post',
+      body: data
+    }).then(function(response) {
+      if(response.status === 403){
+        alert('Err');
+        return;
+      }
+      else {
+        /*FE chg*/
+        var edgeId = srcId+""+destId;
+        self.state.elements = self.state.elements.filter(function(element){
+          return element.data.id !== edgeId;
+        });
+        self.renderDataLineage(self.state.elements);
+      }
+    });
+  }
+
+  callApi(action, data) {
+    var url = "http://localhost:8000/"+action;
+    fetch(url, {
+           method: 'post',
+           headers: {
+                   'Accept': 'application/json, text/plain, */*',
+                   'Content-Type': 'application/json'
+           },
+           body: data
+         }).then(function(response) {
+            if(response.status === 403)
+                return false;
+            else
+                return true;
+    });
+  }
+
   handleHomeClick() {
     this.props.history.push('/');
   }
 
   handleNodeClick(cy) {
-      var systems = data.systems.filter(function(element){
+      var systems = this.state.elements.filter(function(element){
           return element.type === "node";
       });
       for (const system in systems) {
           if (systems.hasOwnProperty(system)) {
-              cy.$("#"+systems[system].data.id).on('tap', function(evt){
-                    console.log(evt);
-              });
-           }
+            cy.$("#"+systems[system].data.id).on('tap', function(evt){
+                console.log(evt.position)
+                console.log(evt)
+            });
+          }
       }
   }
 
@@ -167,14 +341,6 @@ class LineageModel extends Component {
                   showRemoveEdge: 'none'
             });
             break;
-        case 'removeNode':
-            this.setState({
-                  showAddNode: 'none',
-                  showAddEdge: 'none',
-                  showRemoveNode: 'block',
-                  showRemoveEdge: 'none'
-            });
-            break;
         case 'removeEdge':
             this.setState({
                   showAddNode: 'none',
@@ -200,6 +366,8 @@ class LineageModel extends Component {
                   showRemoveEdge: 'none'
             });
             break;
+        default:
+            break;
     }
   }
 
@@ -220,105 +388,9 @@ class LineageModel extends Component {
         case 'removeEdgeDest':
           this.state.removeEdgeDestSystem = selected;
           break;
+        default:
+            break;
     }
-  }
-
-  saveChg(subAction) {
-    switch(subAction) {
-        case 'addNode':
-          this.addNode();
-          break;
-        case 'addEdge':
-          this.addEdge();
-          break;
-        case 'removeNode':
-          this.removeNode();
-          break;
-        case 'removeEdge':
-          this.removeEdge();
-          break;
-    }
-  }
-
-  addNode() {
-    var srcSystem = document.getElementById("srcSystemAddNode").value;
-    var isNodePresent = this.state.elements.filter(function(element){
-                            return element.data.id === srcSystem;
-                        });
-    if(isNodePresent.length > 0 || srcSystem.length === 0)
-      return;
-
-    var newNode = { type: "node",
-                    data: { "id": srcSystem, "color": "#a94442"}
-                  }
-    this.setState(prevState => ({
-            elements: [
-                ...prevState.elements,
-                newNode
-            ]
-        }),
-        () => {
-                if(this.state.addNodeDestSystem.length > 0) {
-                  var destSystems = this.state.addNodeDestSystem.split(',');    
-                  for(var idx in destSystems) {
-                    var destSys = this.state.systemList[destSystems[idx]].trim();
-                    var newEdge = {
-                                   "type": "edge",
-                                   "data": {id: srcSystem+""+destSys, source: srcSystem, target: destSys}
-                                  }
-                    this.state.elements.splice(this.state.elements.length,0,newEdge);
-                  }
-                  this.renderDataLineage(this.state.elements)
-                  this.createFilterList();
-                }
-                else {
-                  this.renderDataLineage(this.state.elements)
-                  this.createFilterList();
-                }
-        }
-    );
-  }
-
-  addEdge(selected) {
-    var srcSystem = this.state.elements[this.state.addEdgeSrcSystem];
-    if(!srcSystem) return;
-    srcSystem = srcSystem.data.id;
-    if(srcSystem.length === 0 || this.state.addEdgeDestSystem.length === 0)
-      return;
-    if(this.state.addEdgeDestSystem.length > 0) {
-      var destSystems = this.state.addEdgeDestSystem.split(',');
-      for(var idx in destSystems) {
-        var destSys = this.state.systemList[destSystems[idx]].trim();
-        var edgeId = srcSystem+""+destSys;
-        var isNodePresent = this.state.elements.filter(function(element){
-                              return element.data.id === edgeId;
-                            });
-        if(isNodePresent.length > 0)
-          return;
-        var newEdge = {
-                       "type": "edge",
-                       "data": {id: edgeId, source: srcSystem, target: destSys}
-                      }
-        this.state.elements.splice(this.state.elements.length,0,newEdge);
-      }
-      this.renderDataLineage(this.state.elements);
-    }
-  }
-
-  removeNode() {
-
-  }
-
-  removeEdge() {
-    if(!this.state.removeEdgeSrcSystem || !this.state.removeEdgeDestSystem) return;
-    var srcId = this.state.systemList[this.state.removeEdgeSrcSystem];
-    var destId = this.state.systemList[this.state.removeEdgeDestSystem];
-    if(srcId.length === 0 || destId.length === 0) return;
-    var edgeId = srcId+""+destId;
-    this.state.elements = this.state.elements.filter(function(element){
-                              return element.data.id !== edgeId;
-                          });
-    this.renderDataLineage(this.state.elements)
   }
 
   renderDataLineage(elements) {
@@ -330,7 +402,7 @@ class LineageModel extends Component {
         {
           selector: 'node',
           style: {
-            'background-color': 'data(color)',
+           'background-color': 'data(color)',
             'label': 'data(id)'
           }
         },
@@ -347,7 +419,7 @@ class LineageModel extends Component {
       ],
       layout: {
         name: 'grid',
-        rows: (this.state.systemList.length/2)
+        rows: (this.state.systemList.length/4)
       }
     });
     this.handleNodeClick(cy);

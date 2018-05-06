@@ -1,48 +1,76 @@
 {
-	"systems": [ 
-	   {
-		 "type": "node",
-	     "data": { "id": "System1", "color": "#a94442"}
-	   },
-	   {
-		"type": "node",
-	     "data": { "id": "System2", "color": "#337ab7" }
-	   },
-	   {
-		 "type": "node",
-	     "data": { "id": "System3", "color": "#bb1313" }
-	   },
-	   {
-		 "type": "node",
-	     "data": { "id": "System4", "color": "#3c763d" }
-	   },
-	   {
-		 "type": "node",
-	     "data": { "id": "System5", "color": "#d4af2b" }
-	   },
-	   {
-		   "type": "edge",
-		   "data": { "id": "System1System2", "source": "System1", "target": "System2" }
-	   },
-	   {
-		   "type": "edge",
-		   "data": { "id": "System2System3", "source": "System2", "target": "System3" }
-	   },
-	   {
-		   "type": "edge",
-		   "data": { "id": "System1System4", "source": "System1", "target": "System4" }
-	   },
-	   {
-		   "type": "edge",
-		   "data": { "id": "System2System5", "source": "System2", "target": "System5" }
-	   },
-	   {
-		   "type": "edge",
-		   "data": { "id": "System5System3", "source": "System5", "target": "System3" }
-	   },
-	   {
-		   "type": "edge",
-		   "data": { "id": "System5System2", "source": "System5", "target": "System2" }
-	   }
+	"systems":[
+		{
+			"type": "node",
+			"data":{
+				"id":"a", "color": "#a94442"
+			}
+		},
+		{
+			"type": "node",
+			"data":{
+				"id":"b", "color": "#337ab7"
+			}
+		},
+		{
+			"type": "node",
+			"data":{
+				"id":"c", "color": "#bb1313"
+}
+		},
+		{
+			"type": "node",
+			"data":{
+				"id":"ed", "color": "#3c763d"
+			}
+		},
+		{
+			"type": "node",
+			"data":{
+				"id":"fg", "color": "#d4af2b"
+			}
+		},
+		{
+			"type": "node",
+			"data":{
+				"id":"123", "color": "#d4af2b"
+			}
+		},
+		{
+			"type": "node",
+			"data":{
+				"id":"12345", "color": "#d4af2b"
+			}
+		},
+		{
+			"type": "node",
+			"data":{
+				"id":"123454", "color": "#d4af2b"
+			}
+		},
+		{
+			"type": "edge",
+			"data":{
+				"source":"a",
+				"target":"b",
+				"id":"ab"
+			}
+		},
+		{
+			"type": "edge",
+			"data":{
+				"source":"c",
+				"target":"b",
+				"id":"cb"
+			}
+		},
+		{
+			"type": "edge",
+			"data":{
+				"source":"123",
+				"target":"a",
+				"id":"123a"
+			}
+		}
 	]
 }
