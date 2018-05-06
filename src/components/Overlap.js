@@ -64,11 +64,19 @@ class Overlap extends Component {
                   Header: "Source Systems",
                   id: "srcSystems",
                   accessor: d => d.srcSystems,
-                  aggregate: vals => vals.join(" , "),
+                  aggregate: vals => {
+                    var temp = []
+                    vals.forEach((val)=>{
+                      val.split(" , ").forEach((ele)=>{
+                        temp.push(ele)
+                      })
+                    })
+                    return [...new Set(temp)].join(" , ")
+                  },
                   Aggregated: row => {
                     return (
                       <span>
-                        
+                        {row.value}
                       </span>
                     );
                  },
