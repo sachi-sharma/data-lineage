@@ -5,7 +5,7 @@ import '../css/LineageModel.css'
 import FaHome from 'react-icons/lib/fa/home'
 
 var cytoscape = require('cytoscape');
-const data = require('../../src/data/data.json');
+//const data = require('../../src/data/data.json');
 
 class LineageModel extends Component {
 
@@ -42,18 +42,18 @@ class LineageModel extends Component {
   }
 
   componentWillMount() {
-    // this.getData();
-    this.state.elements = data.systems;
-    this.createFilterList();
+     this.getData();
+   // this.state.elements = data.systems;
+   // this.createFilterList();
   }
 
   componentDidMount() {
-    this.renderDataLineage(this.state.elements);
+    // this.renderDataLineage(this.state.elements);
   }
 
   getData() {
    var self = this;
-   fetch("http://localhost:8000/getModels")
+   fetch("https://limitless-journey-57599.herokuapp.com/getModels")
      .then(response => response.json())
      .then(dataFromApi => {
        dataFromApi.systems.forEach(function(system) {
@@ -144,9 +144,9 @@ class LineageModel extends Component {
   }
 
   addEdge(selected) {
-    var srcSystem = this.state.elements[this.state.addEdgeSrcSystem];
+    var srcSystem = this.state.systemList[this.state.addEdgeSrcSystem];
     if(!srcSystem) return;
-    srcSystem = srcSystem.data.id;
+//    srcSystem = srcSystem.data.id;
     if(srcSystem.length === 0 || this.state.addEdgeDestSystem.length === 0)
       return;
     if(this.state.addEdgeDestSystem.length > 0) {
@@ -155,7 +155,7 @@ class LineageModel extends Component {
         var destSys = this.state.systemList[destSystems[idx]].trim();
      // this.callApi("manualProcessRelationship", JSON.stringify({action:"add", source: srcSystem, dest: destSys}));
         var self = this;
-        var url = "http://localhost:8000/"+"manualProcessRelationship";
+        var url = "https://limitless-journey-57599.herokuapp.com/manualProcessRelationship";
         var data = new FormData();
         data.append("action","add");
         data.append("source",srcSystem);
@@ -164,7 +164,7 @@ class LineageModel extends Component {
                method: 'post',
                body: data
              }).then(function(response) {
-                if(response.status === 403){
+                if(response.status !== 200){
                     alert('Err');
                     return;
                 }
@@ -212,12 +212,12 @@ class LineageModel extends Component {
   }
 
   callApi(action, data, callback) {
-    var url = "http://localhost:8000/"+action;
+    var url = "https://limitless-journey-57599.herokuapp.com/"+action;
     fetch(url, {
            method: 'post',
            body: data
          }).then(function(response) {
-            if(response.status === 403)
+            if(response.status !== 200)
                 return false;
             else {
               callback(true)
