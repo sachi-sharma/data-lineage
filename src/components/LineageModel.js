@@ -231,23 +231,6 @@ class LineageModel extends Component {
     });
   }
 
-  callApi(action, data) {
-    var url = "http://localhost:8000/"+action;
-    fetch(url, {
-           method: 'post',
-           headers: {
-                   'Accept': 'application/json, text/plain, */*',
-                   'Content-Type': 'application/json'
-           },
-           body: data
-         }).then(function(response) {
-            if(response.status === 403)
-                return false;
-            else
-                return true;
-    });
-  }
-
   handleHomeClick() {
     this.props.history.push('/');
   }
