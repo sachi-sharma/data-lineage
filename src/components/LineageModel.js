@@ -37,7 +37,6 @@ class LineageModel extends Component {
     this.addNode = this.addNode.bind(this);
     this.addEdge = this.addEdge.bind(this);
     this.removeEdge = this.removeEdge.bind(this);
-    this.callApi = this.callApi.bind(this);
     this.renderDataLineage = this.renderDataLineage.bind(this);
   }
 
