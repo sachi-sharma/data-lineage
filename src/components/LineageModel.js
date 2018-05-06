@@ -37,6 +37,7 @@ class LineageModel extends Component {
     this.addNode = this.addNode.bind(this);
     this.addEdge = this.addEdge.bind(this);
     this.removeEdge = this.removeEdge.bind(this);
+    this.callApi = this.callApi.bind(this);
     this.renderDataLineage = this.renderDataLineage.bind(this);
   }
 
@@ -98,58 +99,48 @@ class LineageModel extends Component {
     }
   }
 
-  addNode() {
+  addNode(isValid) {
     var srcSystem = document.getElementById("srcSystemAddNode").value;
-    var isNodePresent = this.state.elements.filter(function(element){
+    if(!isValid) {
+      var isNodePresent = this.state.elements.filter(function(element){
                             return element.data.id === srcSystem;
                         });
-    if(isNodePresent.length > 0 || srcSystem.length === 0)
-      return;
-    // this.callApi("manualProcessNode", JSON.stringify({action:"add", nodeName: srcSystem}));
-    var self = this;
-    var url = "http://localhost:8000/"+"manualProcessNode";
-    var data = new FormData();
-    data.append("action","add");
-    data.append("nodeName",srcSystem);
-    fetch(url, {
-           method: 'post',
-           body: data
-         }).then(function(response) {
-            if(response.status === 403) {
-                alert('Err');
-                return;
-            }
-            else {
-                /*FE chg*/
-                var newNode = { type: "node", data: { "id": srcSystem, "color": "red"} }
-                self.setState(prevState => ({
-                        elements: [
-                            ...prevState.elements,
-                            newNode
-                        ]
-                    }),
-                    () => {
-                            if(self.state.addNodeDestSystem.length > 0) {
-                              var destSystems = self.state.addNodeDestSystem.split(',');
-                              for(var idx in destSystems) {
-                                var destSys = self.state.systemList[destSystems[idx]].trim();
-                                var newEdge = {
-                                               "type": "edge",
-                                               "data": {id: srcSystem+""+destSys, source: srcSystem, target: destSys}
-                                              }
-                                self.state.elements.splice(self.state.elements.length,0,newEdge);
-                              }
-                              self.renderDataLineage(self.state.elements)
-                              self.createFilterList();
-                            }
-                            else {
-                              self.renderDataLineage(self.state.elements)
-                              self.createFilterList();
-                            }
+      if(isNodePresent.length > 0 || srcSystem.length === 0)
+        return;
+      var data = new FormData();
+      data.append("action","add");
+      data.append("nodeName",srcSystem);
+      this.callApi("manualProcessNode", data, this.addNode);
+    }
+    else {
+      var newNode = { type: "node", data: { "id": srcSystem, "color": "red"} }
+      this.setState(prevState => ({
+              elements: [
+                  ...prevState.elements,
+                  newNode
+              ]
+          }),
+          () => {
+                  if(this.state.addNodeDestSystem.length > 0) {
+                    var destSystems = this.state.addNodeDestSystem.split(',');
+                    for(var idx in destSystems) {
+                      var destSys = this.state.systemList[destSystems[idx]].trim();
+                      var newEdge = {
+                                     "type": "edge",
+                                     "data": {id: srcSystem+""+destSys, source: srcSystem, target: destSys}
+                                    }
+                      this.state.elements.splice(this.state.elements.length,0,newEdge);
                     }
-                );
-            }
-        });
+                    this.renderDataLineage(this.state.elements)
+                    this.createFilterList();
+                  }
+                  else {
+                    this.renderDataLineage(this.state.elements)
+                    this.createFilterList();
+                  }
+          }
+      );
+    }
   }
 
   addEdge(selected) {
@@ -198,35 +189,39 @@ class LineageModel extends Component {
     }
   }
 
-  removeEdge() {
+  removeEdge(isValid) {
     if(!this.state.removeEdgeSrcSystem || !this.state.removeEdgeDestSystem) return;
     var srcId = this.state.systemList[this.state.removeEdgeSrcSystem];
     var destId = this.state.systemList[this.state.removeEdgeDestSystem];
-    if(srcId.length === 0 || destId.length === 0) return;
-    // this.callApi("manualProcessRelationship", JSON.stringify({action:"remove", source: srcId, dest: destId}));
-    var self = this;
-    var url = "http://localhost:8000/"+"manualProcessRelationship";
-    var data = new FormData();
-    data.append("action","remove");
-    data.append("source",srcId);
-    data.append("destination",destId);    
-
-    fetch(url, {
-      method: 'post',
-      body: data
-    }).then(function(response) {
-      if(response.status === 403){
-        alert('Err');
-        return;
-      }
-      else {
+    if(!isValid) {
+      if(srcId.length === 0 || destId.length === 0) return;
+      var data = new FormData();
+      data.append("action","remove");
+      data.append("source",srcId);
+      data.append("destination",destId);
+      this.callApi("manualProcessRelationship", data, this.removeEdge);
+    }
+    else {
         /*FE chg*/
         var edgeId = srcId+""+destId;
-        self.state.elements = self.state.elements.filter(function(element){
+        this.state.elements = this.state.elements.filter(function(element){
           return element.data.id !== edgeId;
         });
-        self.renderDataLineage(self.state.elements);
-      }
+        this.renderDataLineage(this.state.elements);
+    }
+  }
+
+  callApi(action, data, callback) {
+    var url = "http://localhost:8000/"+action;
+    fetch(url, {
+           method: 'post',
+           body: data
+         }).then(function(response) {
+            if(response.status === 403)
+                return false;
+            else {
+              callback(true)
+            }
     });
   }
 
