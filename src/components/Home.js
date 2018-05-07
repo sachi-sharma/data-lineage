@@ -17,7 +17,7 @@ class Home extends Component {
     const data = new FormData();
     data.append('csv_file', this.uploadInput.files[0]);
 
-    fetch('http://127.0.0.1:8000/fileUpload', {
+    fetch('http://limitless-journey-57599.herokuapp.com/fileUpload', {
       method: 'POST',
       body: data,
     }).then((response) => {
