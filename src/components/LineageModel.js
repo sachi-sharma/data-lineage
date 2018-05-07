@@ -37,7 +37,7 @@ class LineageModel extends Component {
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleEditAction = this.handleEditAction.bind(this);
     this.handlePopUpFilterChange = this.handlePopUpFilterChange.bind(this);
-    this.saveChg = this.saveChg.bind(this);
+    this.savePopUpChg = this.savePopUpChg.bind(this);
     this.addNode = this.addNode.bind(this);
     this.addEdge = this.addEdge.bind(this);
     this.removeEdge = this.removeEdge.bind(this);
@@ -47,12 +47,12 @@ class LineageModel extends Component {
 
   componentWillMount() {
      this.getData();
-//    this.state.elements = data.systems;
-//    this.createFilterList();
+     // this.state.elements = data.systems;
+     // this.createFilterList();
   }
 
   componentDidMount() {
-//    this.renderDataLineage(this.state.elements);
+   // this.renderDataLineage(this.state.elements);
   }
 
   getData() {
@@ -77,12 +77,7 @@ class LineageModel extends Component {
   }
 
   createFilterList() {
-    // this.state.systemList = [];
     this.state.systemFilterList = [];
-    // this.setState({
-    //       systemFilterList: [],
-    //       systemList: []
-    // });
     var sysArray = this.state.elements.filter(function(element){
                        return element.type === "node";
                    });
@@ -98,149 +93,6 @@ class LineageModel extends Component {
           }
         ]
       }));
-      console.log(this.state.systemFilterList)
-    }
-        // this.state.systemFilterList.push({"label":this.state.systemList[sys],"value":sys});
-  }
-
-  saveChg(subAction) {
-    switch(subAction) {
-        case 'addNode':
-          this.addNode();
-          break;
-        case 'addEdge':
-          this.addEdge();
-          break;
-        case 'removeEdge':
-          this.removeEdge();
-          break;
-        default:
-            break;
-    }
-  }
-
-  addNode(isValid, color) {
-    var srcSystem = document.getElementById("srcSystemAddNode").value;
-    if(!isValid) {
-      var isNodePresent = this.state.elements.filter(function(element){
-                            return element.data.id === srcSystem;
-                        });
-      if(isNodePresent.length > 0 || srcSystem.length === 0)
-        return;
-      var data = new FormData();
-      data.append("action","add");
-      data.append("nodeName",srcSystem);
-      this.callApi("manualProcessNode", data, this.addNode, true);
-    }
-    else {
-      var newNode = { type: "node", data: { "id": srcSystem, "color": color} }
-      this.setState(prevState => ({
-              elements: [
-                  ...prevState.elements,
-                  newNode
-              ]
-          }),
-          () => {
-                  if(this.state.addNodeDestSystem.length > 0) {
-                    var destSystems = this.state.addNodeDestSystem.split(',');
-                    for(var idx in destSystems) {
-                      var destSys = this.state.systemList[destSystems[idx]].trim();
-                      var newEdge = {
-                                     "type": "edge",
-                                     "data": {id: srcSystem+""+destSys, source: srcSystem, target: destSys}
-                                    }
-                      this.state.elements.splice(this.state.elements.length,0,newEdge);
-                    }
-                  }
-                  this.setState(prevState => ({
-                    systemList: [
-                      ...prevState.systemList,
-                      srcSystem
-                    ]
-                  }));
-                  
-                  this.setState(prevState => ({
-                    systemFilterList: [
-                      ...prevState.systemFilterList,
-                      {
-                        label:srcSystem,
-                        value:this.state.systemList.length
-                      }
-                    ]
-                  }));
-                  this.handleFilterChange(this.state.mainSelectedOption); //Check Sachi
-                  // this.renderDataLineage(this.state.elements);
-          }
-      );
-    }
-  }
-
-  addEdge(selected) {
-    var srcSystem = this.state.systemList[this.state.addEdgeSrcSystem];
-    if(!srcSystem) return;
-    if(srcSystem.length === 0 || this.state.addEdgeDestSystem.length === 0)
-      return;
-    if(this.state.addEdgeDestSystem.length > 0) {
-      var destSystems = this.state.addEdgeDestSystem.split(',');
-      for(var idx in destSystems) {
-        var destSys = this.state.systemList[destSystems[idx]].trim();
-     // this.callApi("manualProcessRelationship", JSON.stringify({action:"add", source: srcSystem, dest: destSys}));
-        var self = this;
-        var url = "https://limitless-journey-57599.herokuapp.com/manualProcessRelationship";
-        var data = new FormData();
-        data.append("action","add");
-        data.append("source",srcSystem);
-        data.append("destination",destSys);
-        fetch(url, {
-               method: 'post',
-               body: data
-             }).then(function(response) {
-                if(response.status !== 200){
-                    alert('Err');
-                    return;
-                }
-                else {
-                        /*FE chg*/
-                        var edgeId = srcSystem+""+destSys;
-                        var isNodePresent = self.state.elements.filter(function(element){
-                                              return element.data.id === edgeId;
-                                            });
-                        if(isNodePresent.length > 0)
-                          return;
-                        var newEdge = {
-                                       "type": "edge",
-                                       "data": {id: edgeId, source: srcSystem, target: destSys}
-                                      }
-                        self.state.elements.splice(self.state.elements.length,0,newEdge);
-                        // self.renderDataLineage(self.state.elements);
-                        self.handleFilterChange(self.state.mainSelectedOption); //Check Sachi
-                }
-            });
-      }
-      
-    }
-  }
-
-  removeEdge(isValid) {
-    if(!this.state.removeEdgeSrcSystem || !this.state.removeEdgeDestSystem) return;
-    var srcId = this.state.systemList[this.state.removeEdgeSrcSystem];
-    var destId = this.state.systemList[this.state.removeEdgeDestSystem];
-    if(!isValid) {
-      if(srcId.length === 0 || destId.length === 0) return;
-      var data = new FormData();
-      data.append("action","remove");
-      data.append("source",srcId);
-      data.append("destination",destId);
-      this.callApi("manualProcessRelationship", data, this.removeEdge, false);
-    }
-    else {
-        /*FE chg*/
-        var edgeId = srcId+""+destId;
-        this.state.elements = this.state.elements.filter(function(element){
-          return element.data.id !== edgeId;
-        });
-        this.handleFilterChange(this.state.mainSelectedOption); //Check Sachi
-        // this.renderDataLineage(this.state.elements);
     }
   }
 
@@ -373,8 +225,8 @@ class LineageModel extends Component {
                   showRemoveEdge: 'block'
             });
             break;
-        case 'saveChg':
-            this.saveChg(subAction);
+        case 'savePopUpChg':
+            this.savePopUpChg(subAction);
             this.setState({
                   showAddNode: 'none',
                   showAddEdge: 'none',
@@ -427,6 +279,147 @@ class LineageModel extends Component {
     }
   }
 
+  savePopUpChg(subAction) {
+    switch(subAction) {
+      case 'addNode':
+        this.addNode();
+        break;
+      case 'addEdge':
+        this.addEdge();
+        break;
+      case 'removeEdge':
+        this.removeEdge();
+        break;
+      default:
+      break;
+    }
+  }
+
+  addNode(isValid, color) {
+    var srcSystem = document.getElementById("srcSystemAddNode").value;
+    if(!isValid) {
+      var isNodePresent = this.state.elements.filter(function(element){
+                            return element.data.id === srcSystem;
+                        });
+      if(isNodePresent.length > 0 || srcSystem.length === 0)
+        return;
+      var data = new FormData();
+      data.append("action","add");
+      data.append("nodeName",srcSystem);
+      this.callApi("manualProcessNode", data, this.addNode, true);
+    }
+    else {
+      var newNode = { type: "node", data: { "id": srcSystem, "color": color} }
+      this.setState(prevState => ({
+              elements: [
+                  ...prevState.elements,
+                  newNode
+              ]
+          }),
+          () => {
+                  if(this.state.addNodeDestSystem.length > 0) {
+                    var destSystems = this.state.addNodeDestSystem.split(',');
+                    for(var idx in destSystems) {
+                      var destSys = this.state.systemList[destSystems[idx]].trim();
+                      var newEdge = {
+                                     "type": "edge",
+                                     "data": {id: srcSystem+""+destSys, source: srcSystem, target: destSys}
+                                    }
+                      this.state.elements.splice(this.state.elements.length,0,newEdge);
+                    }
+                  }
+                  this.setState(prevState => ({
+                    systemList: [
+                      ...prevState.systemList,
+                      srcSystem
+                    ]
+                  }));
+                  
+                  this.setState(prevState => ({
+                    systemFilterList: [
+                      ...prevState.systemFilterList,
+                      {
+                        label:srcSystem,
+                        value:this.state.systemList.length
+                      }
+                    ]
+                  }));
+                  this.handleFilterChange(this.state.mainSelectedOption); //Check Sachi
+                  // this.renderDataLineage(this.state.elements);
+          }
+      );
+    }
+  }
+
+  addEdge(selected) {
+    var srcSystem = this.state.systemList[this.state.addEdgeSrcSystem];
+    if(!srcSystem) return;
+    if(srcSystem.length === 0 || this.state.addEdgeDestSystem.length === 0)
+      return;
+    if(this.state.addEdgeDestSystem.length > 0) {
+      var destSystems = this.state.addEdgeDestSystem.split(',');
+      for(var idx in destSystems) {
+        var destSys = this.state.systemList[destSystems[idx]].trim();
+     // this.callApi("manualProcessRelationship", JSON.stringify({action:"add", source: srcSystem, dest: destSys}));
+        var self = this;
+        var url = "https://limitless-journey-57599.herokuapp.com/manualProcessRelationship";
+        var data = new FormData();
+        data.append("action","add");
+        data.append("source",srcSystem);
+        data.append("destination",destSys);
+        fetch(url, {
+               method: 'post',
+               body: data
+             }).then(function(response) {
+                if(response.status !== 200){
+                    alert('Err');
+                    return;
+                }
+                else {
+                        /*FE chg*/
+                        var edgeId = srcSystem+""+destSys;
+                        var isNodePresent = self.state.elements.filter(function(element){
+                                              return element.data.id === edgeId;
+                                            });
+                        if(isNodePresent.length > 0)
+                          return;
+                        var newEdge = {
+                                       "type": "edge",
+                                       "data": {id: edgeId, source: srcSystem, target: destSys}
+                                      }
+                        self.state.elements.splice(self.state.elements.length,0,newEdge);
+                        // self.renderDataLineage(self.state.elements);
+                        self.handleFilterChange(self.state.mainSelectedOption); //Check Sachi
+                }
+            });
+      }
+      
+    }
+  }
+
+  removeEdge(isValid) {
+    if(!this.state.removeEdgeSrcSystem || !this.state.removeEdgeDestSystem) return;
+    var srcId = this.state.systemList[this.state.removeEdgeSrcSystem];
+    var destId = this.state.systemList[this.state.removeEdgeDestSystem];
+    if(!isValid) {
+      if(srcId.length === 0 || destId.length === 0) return;
+      var data = new FormData();
+      data.append("action","remove");
+      data.append("source",srcId);
+      data.append("destination",destId);
+      this.callApi("manualProcessRelationship", data, this.removeEdge, false);
+    }
+    else {
+        /*FE chg*/
+        var edgeId = srcId+""+destId;
+        this.state.elements = this.state.elements.filter(function(element){
+          return element.data.id !== edgeId;
+        });
+        this.handleFilterChange(this.state.mainSelectedOption); //Check Sachi
+        // this.renderDataLineage(this.state.elements);
+    }
+  }
+  
   renderDataLineage(elements) {
     var cy = cytoscape({
       container: document.getElementById('cy'),
@@ -506,7 +499,7 @@ class LineageModel extends Component {
           <label>Destination</label><br/>
           <MultiSelectField multi = {true} options={this.state.systemFilterList} action={(value) => this.handlePopUpFilterChange(value,'addNodeDest')}/>
           <br/>
-          <button className = "saveBtn" onClick={() => this.handleEditAction('saveChg','addNode')}>Save</button>
+          <button className = "saveBtn" onClick={() => this.handleEditAction('savePopUpChg','addNode')}>Save</button>
           <button className = "cancelBtn" onClick={() => this.handleEditAction('closePopUp')}>Cancel</button>
         </div>
         <div className="actionPopup" style={{display:this.state.showAddEdge}}>
@@ -518,7 +511,7 @@ class LineageModel extends Component {
           <br/>
           <MultiSelectField multi = {true} options={this.state.systemFilterList} action={(value) => this.handlePopUpFilterChange(value,'addEdgeDest')}/>
           <br/>
-          <button className = "saveBtn" onClick={() => this.handleEditAction('saveChg','addEdge')}>Save</button>
+          <button className = "saveBtn" onClick={() => this.handleEditAction('savePopUpChg','addEdge')}>Save</button>
           <button className = "cancelBtn" onClick={() => this.handleEditAction('closePopUp')}>Cancel</button>
         </div>
         <div className="actionPopup" style={{display:this.state.showRemoveEdge}}>
@@ -530,7 +523,7 @@ class LineageModel extends Component {
           <br/>
           <MultiSelectField multi = {false} options={this.state.systemFilterList} action={(value) => this.handlePopUpFilterChange(value,'removeEdgeDest')}/>
           <br/>
-          <button className = "saveBtn" onClick={() => this.handleEditAction('saveChg','removeEdge')}>Save</button>
+          <button className = "saveBtn" onClick={() => this.handleEditAction('savePopUpChg','removeEdge')}>Save</button>
           <button className = "cancelBtn" onClick={() => this.handleEditAction('closePopUp')}>Cancel</button>
         </div>
       </div>

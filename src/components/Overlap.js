@@ -18,7 +18,7 @@ class Overlap extends Component {
   }
 
   componentWillMount() {
-    fetch('http://127.0.0.1:8000/getOverlaps', {
+    fetch('https://limitless-journey-57599.herokuapp.com/getOverlaps', {
       method: 'GET',
       mode:'cors'
     })
