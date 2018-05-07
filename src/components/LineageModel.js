@@ -5,7 +5,7 @@ import '../css/LineageModel.css'
 import FaHome from 'react-icons/lib/fa/home'
 
 var cytoscape = require('cytoscape');
-//const data = require('../../src/data/data.json');
+const data = require('../../src/data/data.json');
 
 class LineageModel extends Component {
 
@@ -43,12 +43,12 @@ class LineageModel extends Component {
 
   componentWillMount() {
      this.getData();
-   // this.state.elements = data.systems;
-   // this.createFilterList();
+//    this.state.elements = data.systems;
+//    this.createFilterList();
   }
 
   componentDidMount() {
-    // this.renderDataLineage(this.state.elements);
+//     this.renderDataLineage(this.state.elements);
   }
 
   getData() {
@@ -99,7 +99,7 @@ class LineageModel extends Component {
     }
   }
 
-  addNode(isValid) {
+  addNode(isValid, color) {
     var srcSystem = document.getElementById("srcSystemAddNode").value;
     if(!isValid) {
       var isNodePresent = this.state.elements.filter(function(element){
@@ -110,10 +110,10 @@ class LineageModel extends Component {
       var data = new FormData();
       data.append("action","add");
       data.append("nodeName",srcSystem);
-      this.callApi("manualProcessNode", data, this.addNode);
+      this.callApi("manualProcessNode", data, this.addNode, true);
     }
     else {
-      var newNode = { type: "node", data: { "id": srcSystem, "color": "red"} }
+      var newNode = { type: "node", data: { "id": srcSystem, "color": color} }
       this.setState(prevState => ({
               elements: [
                   ...prevState.elements,
@@ -199,7 +199,7 @@ class LineageModel extends Component {
       data.append("action","remove");
       data.append("source",srcId);
       data.append("destination",destId);
-      this.callApi("manualProcessRelationship", data, this.removeEdge);
+      this.callApi("manualProcessRelationship", data, this.removeEdge, false);
     }
     else {
         /*FE chg*/
@@ -211,18 +211,32 @@ class LineageModel extends Component {
     }
   }
 
-  callApi(action, data, callback) {
+  callApi(action, data, callback, getColor) {
     var url = "https://limitless-journey-57599.herokuapp.com/"+action;
+
     fetch(url, {
            method: 'post',
            body: data
-         }).then(function(response) {
-            if(response.status !== 200)
-                return false;
-            else {
-              callback(true)
+         })
+         .then(response => {
+//            if(response.status === 200)
+//                return response.json()
+//            else
+             return response.json()
+         })
+         .then(r => {
+            if(r.error) {
+                alert(r.error)
             }
-    });
+            else {
+                if(getColor) {
+                    var color = r.color;
+                    callback(true, color)
+                }
+                else
+                    callback(true)
+            }
+         });
   }
 
   handleHomeClick() {
@@ -380,7 +394,7 @@ class LineageModel extends Component {
           selector: 'node',
           style: {
            'background-color': 'data(color)',
-            'label': 'data(id)'
+           'label': 'data(id)'
           }
         },
         {
@@ -399,6 +413,23 @@ class LineageModel extends Component {
         rows: (this.state.systemList.length/4)
       }
     });
+//    cy.nodes().forEach(function(ele) {
+//            ele.qtip({
+//              content: {
+////                text: qtipText(ele),
+//                title: 'sa'
+//              },
+//              style: {
+//                classes: 'qtip-bootstrap'
+//              },
+//              position: {
+//                my: 'bottom center',
+//                at: 'top center',
+//                target: ele
+//              }
+//            });
+//          });
+
     this.handleNodeClick(cy);
   }
 
