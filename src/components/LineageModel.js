@@ -5,7 +5,7 @@ import '../css/LineageModel.css'
 import FaHome from 'react-icons/lib/fa/home'
 
 var cytoscape = require('cytoscape');
-const data = require('../../src/data/data.json');
+//const data = require('../../src/data/data.json');
 var cyqtip = require('cytoscape-qtip');
 
 cyqtip( cytoscape );
@@ -61,11 +61,11 @@ class LineageModel extends Component {
      .then(dataFromApi => {
        dataFromApi.systems.forEach(function(system) {
            self.setState(prevState => ({
-                elements: [
-                  ...prevState.elements,
-                  system
-                ]
-              }));
+              elements: [
+                ...prevState.elements,
+                system
+              ]
+            }));
            if(self.state.elements.length === dataFromApi.systems.length) {
                /* Create system List for filter */
                self.createFilterList();
@@ -82,8 +82,17 @@ class LineageModel extends Component {
                        return element.type === "node";
                    });
     this.state.systemList = sysArray.map(a => a.data.id);
-    for(var sys in this.state.systemList)
-        this.state.systemFilterList.push({"label":this.state.systemList[sys],"value":sys});
+    for(var sys in this.state.systemList) {
+      var l = this.state.systemList[sys]
+      this.setState(prevState => ({
+        systemFilterList: [
+          ...prevState.systemFilterList,
+          {"label":l,
+          "value":sys}
+        ]
+      }));
+    }
+        // this.state.systemFilterList.push({"label":this.state.systemList[sys],"value":sys});
   }
 
   saveChg(subAction) {
@@ -364,19 +373,29 @@ class LineageModel extends Component {
   handlePopUpFilterChange(selected, action) {
     switch(action) {
         case 'addNodeDest':
-          this.state.addNodeDestSystem = selected;
+          this.setState({
+              addNodeDestSystem: selected
+          });
           break;
         case 'addEdgeSrc':
-          this.state.addEdgeSrcSystem = selected;
+          this.setState({
+              addEdgeSrcSystem: selected
+          });
           break;
         case 'addEdgeDest':
-          this.state.addEdgeDestSystem = selected;
+          this.setState({
+              addEdgeDestSystem: selected
+          });
           break;
         case 'removeEdgeSrc':
-          this.state.removeEdgeSrcSystem = selected;
+          this.setState({
+              removeEdgeSrcSystem: selected
+          });
           break;
         case 'removeEdgeDest':
-          this.state.removeEdgeDestSystem = selected;
+          this.setState({
+              removeEdgeDestSystem: selected
+          });
           break;
         default:
             break;
