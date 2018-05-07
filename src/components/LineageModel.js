@@ -23,6 +23,7 @@ class LineageModel extends Component {
       showAddEdge:'none',
       showRemoveNode:'none',
       showRemoveEdge:'none',
+      mainSelectedOption:'',
       addNodeDestSystem: '',
       addEdgeSrcSystem:'',
       addEdgeDestSystem:'',
@@ -76,8 +77,12 @@ class LineageModel extends Component {
   }
 
   createFilterList() {
-    this.state.systemList = [];
+    // this.state.systemList = [];
     this.state.systemFilterList = [];
+    // this.setState({
+    //       systemFilterList: [],
+    //       systemList: []
+    // });
     var sysArray = this.state.elements.filter(function(element){
                        return element.type === "node";
                    });
@@ -87,10 +92,13 @@ class LineageModel extends Component {
       this.setState(prevState => ({
         systemFilterList: [
           ...prevState.systemFilterList,
-          {"label":l,
-          "value":sys}
+          {
+            label:l,
+            value:sys
+          }
         ]
       }));
+      console.log(this.state.systemFilterList)
     }
         // this.state.systemFilterList.push({"label":this.state.systemList[sys],"value":sys});
   }
@@ -143,13 +151,25 @@ class LineageModel extends Component {
                                     }
                       this.state.elements.splice(this.state.elements.length,0,newEdge);
                     }
-                    this.renderDataLineage(this.state.elements)
-                    this.createFilterList();
                   }
-                  else {
-                    this.renderDataLineage(this.state.elements)
-                    this.createFilterList();
-                  }
+                  this.setState(prevState => ({
+                    systemList: [
+                      ...prevState.systemList,
+                      srcSystem
+                    ]
+                  }));
+                  
+                  this.setState(prevState => ({
+                    systemFilterList: [
+                      ...prevState.systemFilterList,
+                      {
+                        label:srcSystem,
+                        value:this.state.systemList.length
+                      }
+                    ]
+                  }));
+                  this.handleFilterChange(this.state.mainSelectedOption); //Check Sachi
+                  // this.renderDataLineage(this.state.elements);
           }
       );
     }
@@ -192,7 +212,8 @@ class LineageModel extends Component {
                                        "data": {id: edgeId, source: srcSystem, target: destSys}
                                       }
                         self.state.elements.splice(self.state.elements.length,0,newEdge);
-                        self.renderDataLineage(self.state.elements);
+                        // self.renderDataLineage(self.state.elements);
+                        self.handleFilterChange(self.state.mainSelectedOption); //Check Sachi
                 }
             });
       }
@@ -218,7 +239,8 @@ class LineageModel extends Component {
         this.state.elements = this.state.elements.filter(function(element){
           return element.data.id !== edgeId;
         });
-        this.renderDataLineage(this.state.elements);
+        this.handleFilterChange(this.state.mainSelectedOption); //Check Sachi
+        // this.renderDataLineage(this.state.elements);
     }
   }
 
@@ -230,10 +252,12 @@ class LineageModel extends Component {
            body: data
          })
          .then(response => {
-           // if(response.status === 200)
-           //     return response.json()
-           // else
-             return response.json()
+           if(response.status === 200 && getColor)
+              return response.json()
+           else if(response.status === 200)
+              return {"success":action}
+            else
+              return response.json()
          })
          .then(r => {
             if(r.error) {
@@ -266,6 +290,7 @@ class LineageModel extends Component {
   }
 
   handleFilterChange(selectedOption) {
+    this.state.mainSelectedOption = selectedOption;
     var selectedArr = selectedOption.split(",");
     var filteredSysArray = [], filteredElements = [];
     var allNodesArray = this.state.elements.filter(function(element){
