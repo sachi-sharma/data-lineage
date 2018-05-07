@@ -26,22 +26,13 @@ class Home extends Component {
 
   }
 
-
-
   render() {
     return (
         <div className = "homeWrapper col-xs-12">
-        <form onSubmit = {this.handlefileUpload}>
-          <div>
-            <input ref={(ref) => { this.uploadInput = ref; }} type="file" />
-          </div>
-          <br />
-          <div>
-            <input type="submit" value="Upload"/>
-          </div>
-        </form>
             <div className="col-xs-4 btnWrapper" id= "btnWrapper">
-              <button id= "uploadBtn" onClick={() => this.handleClick("/")}>  Upload Data </button>
+              <button id= "uploadBtn" onClick={this.handlefileUpload}>  Upload Data </button>
+              <input className = "inputfile" ref={(ref) => { this.uploadInput = ref; }} type="file" />
+              
             </div>
             <div className="col-xs-4 btnWrapper" id= "viewLineage">
               <button id= "viewLineageBtn" onClick={() => this.handleClick("/model")}>  View Lineage Model</button>
