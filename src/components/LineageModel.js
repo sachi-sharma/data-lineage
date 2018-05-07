@@ -6,6 +6,9 @@ import FaHome from 'react-icons/lib/fa/home'
 
 var cytoscape = require('cytoscape');
 const data = require('../../src/data/data.json');
+var cyqtip = require('cytoscape-qtip');
+
+cyqtip( cytoscape );
 
 class LineageModel extends Component {
 
@@ -48,7 +51,7 @@ class LineageModel extends Component {
   }
 
   componentDidMount() {
-//     this.renderDataLineage(this.state.elements);
+//    this.renderDataLineage(this.state.elements);
   }
 
   getData() {
@@ -146,7 +149,6 @@ class LineageModel extends Component {
   addEdge(selected) {
     var srcSystem = this.state.systemList[this.state.addEdgeSrcSystem];
     if(!srcSystem) return;
-//    srcSystem = srcSystem.data.id;
     if(srcSystem.length === 0 || this.state.addEdgeDestSystem.length === 0)
       return;
     if(this.state.addEdgeDestSystem.length > 0) {
@@ -219,9 +221,9 @@ class LineageModel extends Component {
            body: data
          })
          .then(response => {
-//            if(response.status === 200)
-//                return response.json()
-//            else
+           // if(response.status === 200)
+           //     return response.json()
+           // else
              return response.json()
          })
          .then(r => {
@@ -247,14 +249,11 @@ class LineageModel extends Component {
       var systems = this.state.elements.filter(function(element){
           return element.type === "node";
       });
-      for (const system in systems) {
-          if (systems.hasOwnProperty(system)) {
-            cy.$("#"+systems[system].data.id).on('tap', function(evt){
-                console.log(evt.position)
-                console.log(evt)
-            });
-          }
-      }
+      // for (const system in systems) {
+      //     if (systems.hasOwnProperty(system)) {
+      //       $( "#foo" ).trigger( "click" );
+      //     }
+      // }
   }
 
   handleFilterChange(selectedOption) {
@@ -413,22 +412,27 @@ class LineageModel extends Component {
         rows: (this.state.systemList.length/4)
       }
     });
-//    cy.nodes().forEach(function(ele) {
-//            ele.qtip({
-//              content: {
-////                text: qtipText(ele),
-//                title: 'sa'
-//              },
-//              style: {
-//                classes: 'qtip-bootstrap'
-//              },
-//              position: {
-//                my: 'bottom center',
-//                at: 'top center',
-//                target: ele
-//              }
-//            });
-//          });
+    cy.elements().nodes().qtip({
+      content: function() {
+        var attr = this._private.data.attributes;
+        var str = ""
+        attr.forEach(function(attr){
+          str = str+"<div>"+attr+"</div><hr>";
+        });
+        return str;
+      },
+      position: {
+        my: 'top center',
+        at: 'bottom center'
+      },
+      style: {
+        classes: 'qtip-bootstrap',
+        tip: {
+          width: 16,
+          height: 8
+        }
+      }
+		});
 
     this.handleNodeClick(cy);
   }
