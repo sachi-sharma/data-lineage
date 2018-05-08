@@ -143,12 +143,18 @@ class LineageModel extends Component {
               cy.$("#"+systemId).on('tap', function(evt){
                     var test = evt.target.data('id')
                     var connectedSystems = self.getConnectedSystemId(test);
+                    var d =  "block";
+                    if(connectedSystems.includes(test)) {
+                      var srcNode = document.getElementById(test);
+                      if(srcNode != null && srcNode.style.display == "none")
+                        d = "block";
+                      else 
+                        d = "none";
+                    }
                     connectedSystems.forEach(function(s){
                       var n = document.getElementById(s);
-                      if(n != null && n.style.display == "block")
-                        n.style.display = "none"
-                      else if(n != null)
-                        n.style.display = "block";
+                      if(n != null)
+                        n.style.display = d;
                     });  
               });
            }
@@ -495,10 +501,11 @@ class LineageModel extends Component {
             attrList += attr+"\n";
           });
           attrList = attrList.replace(/(?:\r\n|\r|\n)/g, '<hr>');
+
           self.setState(prevState => ({
             attributeList: [
               ...prevState.attributeList,
-              <div class= 'atributeTip' id={nodeId} style={{left:left,top:top, display:'none'}}>
+              <div className= 'atributeTip' key={nodeId} id={nodeId} style={{left:left,top:top, display:'none'}}>
                 {attrList}
               </div>
             ]
