@@ -3,6 +3,7 @@ import 'react-select/dist/react-select.css'
 import MultiSelectField from './MultiSelectField'
 import '../css/LineageModel.css'
 import FaHome from 'react-icons/lib/fa/home'
+import AttributeTip from './AttributeTip';
 
 var cytoscape = require('cytoscape');
 const data = require('../../src/data/data.json');
@@ -505,9 +506,7 @@ class LineageModel extends Component {
           self.setState(prevState => ({
             attributeList: [
               ...prevState.attributeList,
-              <div className= 'atributeTip' key={nodeId} id={nodeId} style={{left:left,top:top, display:'none'}}>
-                {attrList}
-              </div>
+              <AttributeTip key={nodeId} nodeId={nodeId} attrList = {attrList} left={left} top={top}/>
             ]
           }));
           var attrNode = document.getElementById(nodeId);
