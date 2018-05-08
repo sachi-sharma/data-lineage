@@ -5,7 +5,7 @@ import '../css/LineageModel.css'
 import FaHome from 'react-icons/lib/fa/home'
 
 var cytoscape = require('cytoscape');
-//const data = require('../../src/data/data.json');
+const data = require('../../src/data/data.json');
 var cyqtip = require('cytoscape-qtip');
 
 cyqtip( cytoscape );
@@ -28,12 +28,14 @@ class LineageModel extends Component {
       addEdgeSrcSystem:'',
       addEdgeDestSystem:'',
       removeEdgeSrcSystem:'',
-      removeEdgeDestSystem:''
+      removeEdgeDestSystem:'',
+      attributeList: []
     };
     this.getData = this.getData.bind(this);
     this.createFilterList = this.createFilterList.bind(this);
     this.handleHomeClick = this.handleHomeClick.bind(this);
     this.handleNodeClick = this.handleNodeClick.bind(this);
+    this.getConnectedSystemId = this.getConnectedSystemId.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
     this.handleEditAction = this.handleEditAction.bind(this);
     this.handlePopUpFilterChange = this.handlePopUpFilterChange.bind(this);
@@ -134,11 +136,40 @@ class LineageModel extends Component {
       var systems = this.state.elements.filter(function(element){
           return element.type === "node";
       });
-      // for (const system in systems) {
-      //     if (systems.hasOwnProperty(system)) {
-      //       $( "#foo" ).trigger( "click" );
-      //     }
-      // }
+      var self = this;
+      for (const system in systems) {
+          if (systems.hasOwnProperty(system)) {
+              var systemId = systems[system].data.id
+              cy.$("#"+systemId).on('tap', function(evt){
+                    var test = evt.target.data('id')
+                    var connectedSystems = self.getConnectedSystemId(test);
+                    connectedSystems.forEach(function(s){
+                      var n = document.getElementById(s);
+                      if(n != null && n.style.display == "block")
+                        n.style.display = "none"
+                      else if(n != null)
+                        n.style.display = "block";
+                    });  
+              });
+           }
+      }
+  }
+
+  getConnectedSystemId(systemId) {
+    var connectedSysArr = [], newNodes = [];
+    this.state.elements.forEach(function(element){
+      if(element.data.source === systemId) {
+        newNodes.push(element.data.target);
+      }
+      if(element.data.target === systemId) {
+        newNodes.push(element.data.source);
+      }
+      if(element.data.id === systemId) {
+        newNodes.push(element.data.id);
+      }
+    });
+    connectedSysArr.push.apply(connectedSysArr, newNodes);
+    return connectedSysArr;
   }
 
   handleFilterChange(selectedOption) {
@@ -419,7 +450,6 @@ class LineageModel extends Component {
         // this.renderDataLineage(this.state.elements);
     }
   }
-  
   renderDataLineage(elements) {
     var cy = cytoscape({
       container: document.getElementById('cy'),
@@ -449,29 +479,59 @@ class LineageModel extends Component {
         rows: (this.state.systemList.length/4)
       }
     });
-    cy.elements().nodes().qtip({
-      content: function() {
-        var attr = this._private.data.attributes;
-        var str = ""
-        attr.forEach(function(attr){
-          str = str+"<div>"+attr+"</div><hr>";
-        });
-        return str;
-      },
-      position: {
-        my: 'top center',
-        at: 'bottom center'
-      },
-      style: {
-        classes: 'qtip-bootstrap',
-        tip: {
-          width: 16,
-          height: 8
+
+    var modelDiv = document.getElementById('cy');
+    var self = this;
+    var nodeIdList = elements.map(a => a.data.id);
+    cy.elements().nodes().forEach(function(node){
+      var attributes = node.data('attributes');
+      var nodeId = node.data('id');
+      var left = node.position().x;
+      var top = node.position().y;
+      var attrList = '';
+      if(attributes) {
+        if(nodeIdList.includes(nodeId)) {
+          attributes.forEach(function(attr){
+            attrList += attr+"\n";
+          });
+          attrList = attrList.replace(/(?:\r\n|\r|\n)/g, '<hr>');
+          self.setState(prevState => ({
+            attributeList: [
+              ...prevState.attributeList,
+              <div class= 'atributeTip' id={nodeId} style={{left:left,top:top, display:'none'}}>
+                {attrList}
+              </div>
+            ]
+          }));
+          var attrNode = document.getElementById(nodeId);
+          if(attrNode != null)
+            attrNode.innerHTML = attrList;
         }
       }
-		});
-
+    });
     this.handleNodeClick(cy);
+    /// cy.elements().nodes().qtip({
+    //   content: function() {
+    //     var attr = this._private.data.attributes;
+    //     var str = ""
+    //     attr.forEach(function(attr){
+    //       str = str+"<div>"+attr+"</div><hr>";
+    //     });
+    //     return str;
+    //   },
+    //   position: {
+    //     my: 'top center',
+    //     at: 'bottom center'
+    //   },
+    //   style: {
+    //     classes: 'qtip-bootstrap',
+    //     tip: {
+    //       width: 16,
+    //       height: 8
+    //     }
+    //   }
+    // });
+    // this.handleNodeClick(cy);
   }
 
   render() {
@@ -486,12 +546,14 @@ class LineageModel extends Component {
               </div>
             </div>
             <div className="addRemovePanel">
-              <button className="addNodeBtn col-xs-12" onClick={() => this.handleEditAction('addNode')} size={70}>Add Node</button>
-              <button className="addEdgeBtn col-xs-12" onClick={() => this.handleEditAction('addEdge')} size={70}>Add Edge</button>
-              <button className="removeEdgeBtn col-xs-12" onClick={() => this.handleEditAction('removeEdge')} size={70}>Remove Edge</button>
+              <button className="addNodeBtn col-xs-12" onClick={() => this.handleEditAction('addNode')} size={70}>Add System</button>
+              <button className="addEdgeBtn col-xs-12" onClick={() => this.handleEditAction('addEdge')} size={70}>Add Relation</button>
+              <button className="removeEdgeBtn col-xs-12" onClick={() => this.handleEditAction('removeEdge')} size={70}>Remove Relation</button>
             </div>
           </div>
-          <div className="cy col-xs-8" id="cy"></div>
+          <div className="cy col-xs-8" id="cy">
+          {this.state.attributeList}
+          </div>
         </div>
         <div className="actionPopup" style={{display:this.state.showAddNode}}>
           <label>Source</label><br/>

@@ -1,5 +1,5 @@
 hr {
-    margin: 0;
+    margin: 5px;
 }
 .lineageWrapper {
     position: absolute;
@@ -28,6 +28,13 @@ hr {
     top: 3em;
     position: absolute;
     left: 33%;
+}
+
+.lineageWrapper .cy .atributeTip{
+    position: absolute;
+    background-color: white;
+    opacity: 0.8; 
+    border: solid 1px black;
 }
 
 .actionPopup {
