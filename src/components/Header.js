@@ -4,7 +4,7 @@ class Header extends Component {
     render() {
         return (
             <div className="header">
-               <h1>BNY - Data Lineage</h1>
+               <h1>Dynamic - Data Lineage</h1>
             </div>
         );
     }
