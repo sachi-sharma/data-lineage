@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import '../css/Home.css'
+const cloudURL = require('../../src/data/cloudURL.json');
 
 class Home extends Component {
 
@@ -17,7 +18,7 @@ class Home extends Component {
     const data = new FormData();
     data.append('csv_file', this.uploadInput.files[0]);
 
-    fetch('http://limitless-journey-57599.herokuapp.com/fileUpload', {
+    fetch(cloudURL.url+'/fileUpload', {
       method: 'POST',
       body: data,
     }).then((response) => {

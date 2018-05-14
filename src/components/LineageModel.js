@@ -6,7 +6,8 @@ import FaHome from 'react-icons/lib/fa/home'
 import AttributeTip from './AttributeTip';
 
 var cytoscape = require('cytoscape');
-const data = require('../../src/data/data.json');
+// const data = require('../../src/data/data.json');
+const cloudURL = require('../../src/data/cloudURL.json');
 var cyqtip = require('cytoscape-qtip');
 
 cyqtip( cytoscape );
@@ -60,7 +61,7 @@ class LineageModel extends Component {
 
   getData() {
    var self = this;
-   fetch("https://limitless-journey-57599.herokuapp.com/getModels")
+   fetch(cloudURL.url+"getModels")
      .then(response => response.json())
      .then(dataFromApi => {
        dataFromApi.systems.forEach(function(system) {
@@ -100,7 +101,7 @@ class LineageModel extends Component {
   }
 
   callApi(action, data, callback, getColor) {
-    var url = "https://limitless-journey-57599.herokuapp.com/"+action;
+    var url = cloudURL.url+action;
 
     fetch(url, {
            method: 'post',
@@ -400,7 +401,7 @@ class LineageModel extends Component {
         var destSys = this.state.systemList[destSystems[idx]].trim();
      // this.callApi("manualProcessRelationship", JSON.stringify({action:"add", source: srcSystem, dest: destSys}));
         var self = this;
-        var url = "https://limitless-journey-57599.herokuapp.com/manualProcessRelationship";
+        var url = cloudURL.url+"manualProcessRelationship";
         var data = new FormData();
         data.append("action","add");
         data.append("source",srcSystem);
